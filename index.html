@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OpenStreetMap Integration</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #eef2f7;
+    }
+    header {
+      padding: 1rem;
+      background: #1a73e8;
+      color: #fff;
+      text-align: center;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.75rem;
+      padding: 1rem;
+      background: #fff;
+      align-items: center;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .controls label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+      color: #333;
+    }
+    .controls input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    .controls button {
+      padding: 0.85rem 1rem;
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      background: #1a73e8;
+      cursor: pointer;
+      font-size: 1rem;
+      width: 100%;
+      min-width: 140px;
+    }
+    .controls button:hover {
+      background: #1558b0;
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      align-items: center;
+      padding: 0.5rem 0;
+    }
+    .filters label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.95rem;
+      color: #333;
+      cursor: pointer;
+    }
+    #map {
+      flex: 1;
+      min-height: 70vh;
+      margin: 0 auto;
+      width: 100%;
+      max-width: 1200px;
+    }
+    .info {
+      padding: 1rem;
+      background: #fff;
+      color: #333;
+      text-align: center;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto 1rem;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+    }
+    @media (max-width: 640px) {
+      .controls {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>OpenStreetMap Integration</h1>
+    <p>Plane eine Route mit Start/Ziel und filtere POIs für Tankstellen, Rastplätze und Ladesäulen.</p>
+  </header>
+  <section class="controls">
+    <div>
+      <label for="start">Start</label>
+      <input id="start" type="text" placeholder="Startadresse eingeben" />
+    </div>
+    <div>
+      <label for="destination">Ziel</label>
+      <input id="destination" type="text" placeholder="Zieladresse eingeben" />
+    </div>
+    <div>
+      <button id="planRouteBtn" type="button">Route planen</button>
+    </div>
+    <div>
+      <button id="clearBtn" type="button">Zurücksetzen</button>
+    </div>
+    <div style="grid-column: 1 / -1;">
+      <div class="filters">
+        <label><input type="checkbox" id="filterGas" checked /> Tankstellen</label>
+        <label><input type="checkbox" id="filterRest" checked /> Rastplätze</label>
+        <label><input type="checkbox" id="filterCharge" checked /> Ladesäulen</label>
+      </div>
+    </div>
+  </section>
+  <div id="map"></div>
+  <div class="info" id="info">Die Karte nutzt OpenStreetMap. Gib Start und Ziel ein, um eine Route zu planen.</div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script>
+    let map;
+    let routeLayer;
+    let poiMarkers = [];
+    let currentRouteGeoJson = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initMap();
+      document.getElementById('planRouteBtn').addEventListener('click', planRoute);
+      document.getElementById('clearBtn').addEventListener('click', resetMap);
+      document.getElementById('filterGas').addEventListener('change', updatePOIs);
+      document.getElementById('filterRest').addEventListener('change', updatePOIs);
+      document.getElementById('filterCharge').addEventListener('change', updatePOIs);
+      document.getElementById('start').addEventListener('keydown', handleEnterKey);
+      document.getElementById('destination').addEventListener('keydown', handleEnterKey);
+    });
+
+    function initMap() {
+      map = L.map('map').setView([48.137154, 11.576124], 6);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap-Mitwirkende',
+        maxZoom: 19,
+      }).addTo(map);
+      routeLayer = L.layerGroup().addTo(map);
+      updateInfo('OpenStreetMap geladen. Gib Start und Ziel ein, um eine Route zu planen.');
+    }
+
+    function updateInfo(message) {
+      document.getElementById('info').textContent = message;
+    }
+
+    function handleEnterKey(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        planRoute();
+      }
+    }
+
+    async function planRoute() {
+      const originText = document.getElementById('start').value.trim();
+      const destinationText = document.getElementById('destination').value.trim();
+      if (!originText || !destinationText) {
+        updateInfo('Bitte gib sowohl Start als auch Ziel ein.');
+        return;
+      }
+      updateInfo('Route wird berechnet...');
+      const origin = await geocode(originText);
+      const destination = await geocode(destinationText);
+      if (!origin || !destination) {
+        updateInfo('Start oder Ziel konnte nicht gefunden werden. Bitte überprüfe die Eingaben.');
+        return;
+      }
+      const route = await fetchRoute(origin, destination);
+      if (!route) {
+        updateInfo('Route konnte nicht berechnet werden.');
+        return;
+      }
+      drawRoute(route);
+      updateInfo(`Route von ${originText} nach ${destinationText} geladen.`);
+      updatePOIs();
+    }
+
+    async function geocode(query) {
+      const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
+      try {
+        const response = await fetch(url, {
+          headers: { 'Accept-Language': 'de' },
+        });
+        const results = await response.json();
+        if (results && results.length > 0) {
+          return {
+            lat: parseFloat(results[0].lat),
+            lng: parseFloat(results[0].lon),
+          };
+        }
+      } catch (error) {
+        console.error('Geocoding-Fehler:', error);
+      }
+      return null;
+    }
+
+    async function fetchRoute(origin, destination) {
+      const url = `https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson`;
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
+        if (data && data.routes && data.routes.length > 0) {
+          return data.routes[0].geometry;
+        }
+      } catch (error) {
+        console.error('Routing-Fehler:', error);
+      }
+      return null;
+    }
+
+    function drawRoute(geometry) {
+      clearRoute();
+      currentRouteGeoJson = geometry;
+      const routeFeature = L.geoJSON(geometry, {
+        style: {
+          color: '#1a73e8',
+          weight: 6,
+          opacity: 0.8,
+        },
+      }).addTo(routeLayer);
+      map.fitBounds(routeFeature.getBounds(), { padding: [40, 40] });
+    }
+
+    function clearRoute() {
+      routeLayer.clearLayers();
+      currentRouteGeoJson = null;
+    }
+
+    function resetMap() {
+      document.getElementById('start').value = '';
+      document.getElementById('destination').value = '';
+      clearRoute();
+      clearPOIMarkers();
+      map.setView([48.137154, 11.576124], 6);
+      updateInfo('Zurückgesetzt. Gib Start und Ziel ein, um eine neue Route zu planen.');
+    }
+
+    function updatePOIs() {
+      clearPOIMarkers();
+      const selected = [];
+      if (document.getElementById('filterGas').checked) {
+        selected.push({ key: 'amenity', value: 'fuel', label: 'Tankstelle', color: 'blue' });
+      }
+      if (document.getElementById('filterRest').checked) {
+        selected.push({ key: 'highway', value: 'rest_area', label: 'Rastplatz', color: 'orange' });
+      }
+      if (document.getElementById('filterCharge').checked) {
+        selected.push({ key: 'amenity', value: 'charging_station', label: 'Ladesäule', color: 'green' });
+      }
+      if (selected.length === 0) {
+        updateInfo('Filter deaktiviert. Keine POI-Kategorien ausgewählt.');
+        return;
+      }
+      const bounds = currentRouteGeoJson ? getRouteBounds(currentRouteGeoJson) : map.getBounds();
+      fetchPOIs(bounds, selected);
+    }
+
+    function getRouteBounds(geojson) {
+      const coordinates = geojson.coordinates;
+      return L.latLngBounds(coordinates.map(([lng, lat]) => [lat, lng])).pad(0.2);
+    }
+
+    async function fetchPOIs(bounds, categories) {
+      const bboxString = `${bounds.getSouth()},${bounds.getWest()},${bounds.getNorth()},${bounds.getEast()}`;
+      const queries = categories
+        .map((cat) => `node["${cat.key}"="${cat.value}"](${bboxString});`)
+        .join('');
+      const query = `[out:json][timeout:25];(${queries});out center;`;
+      const url = 'https://overpass-api.de/api/interpreter';
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          body: `data=${encodeURIComponent(query)}`,
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+          },
+        });
+        const data = await response.json();
+        if (!data.elements || data.elements.length === 0) {
+          updateInfo('Keine POIs gefunden.');
+          return;
+        }
+        data.elements.forEach((element) => {
+          const type = categories.find((cat) => element.tags && element.tags[cat.key] === cat.value);
+          if (!type) return;
+          const lat = element.lat || element.center?.lat;
+          const lon = element.lon || element.center?.lon;
+          if (!lat || !lon) return;
+          const marker = L.circleMarker([lat, lon], {
+            radius: 7,
+            color: type.color,
+            fillColor: type.color,
+            fillOpacity: 0.9,
+            weight: 1,
+          }).addTo(map);
+          const title = element.tags.name || type.label;
+          marker.bindPopup(`<strong>${title}</strong><br>${type.label}`);
+          poiMarkers.push(marker);
+        });
+        updateInfo(`POIs gefunden: ${poiMarkers.length} Marker hinzugefügt.`);
+      } catch (error) {
+        console.error('POI-Fehler:', error);
+        updateInfo('Fehler beim Laden der POIs. Versuche es später erneut.');
+      }
+    }
+
+    function clearPOIMarkers() {
+      poiMarkers.forEach((marker) => map.removeLayer(marker));
+      poiMarkers = [];
+    }
+  </script>
+</body>
+</html>
+EOF
