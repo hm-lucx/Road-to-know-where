@@ -26,7 +26,18 @@ def geocode_city(city_name):
     return float(data[0]["lat"]), float(data[0]["lon"])
 
 
-def cheapest_station(city_name, radius_km=25):
+def cheapest_station(city_name, fuel_type="e5", radius_km=25):
+    """
+    Findet die günstigste Tankstelle für eine Stadt.
+    
+    Args:
+        city_name: Stadtname (z.B. "München")
+        fuel_type: Kraftstoffart (e5, e10, diesel) - standard: e5
+        radius_km: Suchradius in km - standard: 25
+    
+    Returns:
+        Dict mit Name, Preis, Entfernung und Adresse
+    """
     lat, lon = geocode_city(city_name)
     url = "https://creativecommons.tankerkoenig.de/json/list.php"
     params = {
@@ -34,7 +45,7 @@ def cheapest_station(city_name, radius_km=25):
         "lng": lon,
         "rad": int(radius_km),
         "sort": "price",
-        "type": "e5",
+        "type": fuel_type.lower(),
         "apikey": TANKERKOENIG_API_KEY,
     }
     r = requests.get(url, params=params, timeout=10)
@@ -51,6 +62,7 @@ def cheapest_station(city_name, radius_km=25):
     return {
         "name": cheapest.get("name"),
         "price": cheapest.get("price"),
+        "fuel_type": fuel_type.upper(),
         "distance_km": round(cheapest.get("dist", 0), 1),
         "address": f'{cheapest.get("street", "")}, {cheapest.get("place", "")}',
     }
@@ -105,18 +117,19 @@ def _get_central_city(bundesland):
 
 
 if __name__ == "__main__":
-    city = input("Welche Stadt möchtest du prüfen? ")
+    city = input("Welche Stadt möchtest du prüfen? (z.B. München): ").strip()
+    fuel = input("Welche Kraftstoffart? (e5/e10/diesel, default: e5): ").strip() or "e5"
+    
     try:
-        result = cheapest_station(city)
-        print(f"Günstigste Tankstelle: {result['name']}")
-        print(f"  Preis E5: {result['price']:.3f} €/L")
-        print(f"  Entfernung: {result['distance_km']} km")
-        print(f"  Adresse: {result['address']}")
+        result = cheapest_station(city, fuel_type=fuel)
+        print("\n" + "="*50)
+        print(f"🚗 Günstigste Tankstelle in {city}")
+        print("="*50)
+        print(f"Name:        {result['name']}")
+        print(f"Preis {result['fuel_type']}: {result['price']:.3f} €/L")
+        print(f"Entfernung:  {result['distance_km']} km")
+        print(f"Adresse:     {result['address']}")
+        print("="*50 + "\n")
     except Exception as e:
-        print("Fehler:", e)
+        print(f"❌ Fehler: {e}")
         sys.exit(1)
-cd /Users/milanrickhoff/Documents/GitHub/Road-to-know-where
-git status
-git add "Tankstelle MR.py"
-git commit -m "Add gas station finder"
-git push origin Tankstelle-MR
