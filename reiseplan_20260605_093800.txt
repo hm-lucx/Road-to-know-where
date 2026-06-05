@@ -1,0 +1,61 @@
+
+======================================================================
+✈️  VOLLSTÄNDIGER REISEPLAN
+======================================================================
+📋 REISEPARAMETER:
+   Startort:          München
+   Dauer:             3 Tage
+   Theme:             Städte
+   Kraftstoff:        E5
+   Verbrauch:         7.5 L/100km
+
+----------------------------------------------------------------------
+🚗 TANKSTELLE AM STARTORT:
+   Name:              Gebrüder Neeb GmbH & Co. KG
+   Preis:             1.838 €/L
+   Entfernung:        9.2 km
+   Adresse:           Lochhamer Schlag, Gräfelfing
+
+----------------------------------------------------------------------
+💰 TREIBSTOFFKOSTEN:
+   Distanz:           4 km
+   Liter benötigt:    0.3 L
+   Preis pro Liter:   1.838 €
+   GESAMTKOSTEN:      💰 0.55 €
+
+----------------------------------------------------------------------
+🌤️ WETTER & PACKLISTE:
+   Datenbasis:        forecast
+   Temperaturspanne:  Zwischen 10.2 und 22.3 °C
+   Regentage:         1
+   Wetterrisiko:      MITTEL
+
+   📦 Packliste:
+      Packe eine leichte Regenjacke ein und halte einzelne Stopps flexibel.
+
+   Tagesuebersicht:
+      Tag 1: München - 10.7°C bis 18.1°C, Leichter Regen
+      Tag 2: München - 10.2°C bis 20.7°C, Leichter Regen
+      Tag 3: München - 13.2°C bis 22.3°C, Bedeckt
+
+----------------------------------------------------------------------
+🗺️ ROUTE & SEHENSWÜRDIGKEITEN:
+   Theme:             Städte
+   Stopps:            4
+   Tagespläne:        3
+   POIs:              6
+
+   Route:
+      1. München (48.1351, 11.582)
+      2. Dresden (51.0504, 13.7373)
+      3. Berlin (52.52, 13.405)
+      4. Köln (50.9375, 6.9603)
+
+   Top Sehenswürdigkeiten:
+      • Zwinger: Barocke Schlossanlage mit Museen.
+      • Frauenkirche: Wiederaufgebaute Landmarke der Stadt.
+      • Brandenburger Tor: Symbol der deutschen Einheit.
+      • Museumsinsel: Weltkulturerbe mit fünf Museen.
+      • Kölner Dom: Gotische Kathedrale und UNESCO-Weltkulturerbe.
+
+======================================================================

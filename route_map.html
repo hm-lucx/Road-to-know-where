@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deine Route mit interaktiver Karte</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    #wrapper { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    #map { height: 60vh; width: 100%; }
+    #panel { padding: 16px; max-width: 1200px; margin: auto; }
+    .section { margin-bottom: 20px; }
+    .section h2 { margin-bottom: 8px; }
+    .poi-card { border: 1px solid #ccc; border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+    #input-params { list-style: none; padding-left: 0; }
+    #input-params li { margin-bottom: 4px; }
+    .poi-card a { color: #0066cc; text-decoration: none; }
+    .poi-card a:hover { text-decoration: underline; }
+    @media (min-width: 1000px) {
+      #wrapper { grid-template-columns: 1.4fr 0.8fr; max-height: 100vh; }
+      #map { height: 100vh; }
+      #panel { margin: 0; max-height: 100vh; overflow-y: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div id="wrapper">
+    <div id="map"></div>
+    <div id="panel">
+    <div class="section">
+      <h1>Reiseplan: <span id="theme-title"></span></h1>
+      <p id="summary"></p>
+    </div>
+    <div class="section">
+      <h2>Eingabeparameter</h2>
+      <ul id="input-params"></ul>
+    </div>
+    <div class="section">
+      <h2>⛽ Tankstelle am Startort</h2>
+      <div id="gas-station"></div>
+    </div>
+    <div class="section">
+      <h2>🌤️ Wetter & Packliste</h2>
+      <div id="weather-section"></div>
+    </div>
+    <div class="section">
+      <h2>Etappenziele</h2>
+      <ol id="route-list"></ol>
+    </div>
+    <div class="section">
+      <h2>Tag für Tag</h2>
+      <div id="daily-plan"></div>
+    </div>
+    <div class="section">
+      <h2>Sehenswürdigkeiten (POI)</h2>
+      <div id="poi-list"></div>
+    </div>
+    <div class="section">
+      <h2>Günstige Tankstellen auf der Route</h2>
+      <div id="fuel-list"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script id="trip-data" type="application/json">{
+  "start_location": "München",
+  "theme": "Städte",
+  "duration_days": 3,
+  "travel_time_per_day": 8,
+  "route_stops": [
+    {
+      "name": "München",
+      "lat": 48.1351,
+      "lng": 11.582
+    },
+    {
+      "name": "Dresden",
+      "lat": 51.0504,
+      "lng": 13.7373,
+      "poi": [
+        {
+          "name": "Zwinger",
+          "description": "Barocke Schlossanlage mit Museen."
+        },
+        {
+          "name": "Frauenkirche",
+          "description": "Wiederaufgebaute Landmarke der Stadt."
+        }
+      ]
+    },
+    {
+      "name": "Berlin",
+      "lat": 52.52,
+      "lng": 13.405,
+      "poi": [
+        {
+          "name": "Brandenburger Tor",
+          "description": "Symbol der deutschen Einheit."
+        },
+        {
+          "name": "Museumsinsel",
+          "description": "Weltkulturerbe mit fünf Museen."
+        }
+      ]
+    },
+    {
+      "name": "Köln",
+      "lat": 50.9375,
+      "lng": 6.9603,
+      "poi": [
+        {
+          "name": "Kölner Dom",
+          "description": "Gotische Kathedrale und UNESCO-Weltkulturerbe."
+        },
+        {
+          "name": "Rheinpromenade",
+          "description": "Spazierwege am Fluss mit Blick auf die Altstadt."
+        }
+      ]
+    }
+  ],
+  "route_geometry": [
+    [
+      48.1351,
+      11.582
+    ],
+    [
+      51.0504,
+      13.7373
+    ],
+    [
+      52.52,
+      13.405
+    ],
+    [
+      50.9375,
+      6.9603
+    ]
+  ],
+  "daily_plan": [
+    {
+      "day": "Tag 1",
+      "activities": "Etappe: Dresden. Plane genug Zeit für Sehenswürdigkeiten und Pausen; ca. 8 Stunden Tagesreisezeit."
+    },
+    {
+      "day": "Tag 2",
+      "activities": "Etappe: Berlin. Plane genug Zeit für Sehenswürdigkeiten und Pausen; ca. 8 Stunden Tagesreisezeit."
+    },
+    {
+      "day": "Tag 3",
+      "activities": "Etappe: Köln. Plane genug Zeit für Sehenswürdigkeiten und Pausen; ca. 8 Stunden Tagesreisezeit."
+    }
+  ],
+  "pois": [
+    {
+      "name": "Zwinger",
+      "description": "Barocke Schlossanlage mit Museen.",
+      "location": "Dresden",
+      "lat": 51.0504,
+      "lng": 13.7373
+    },
+    {
+      "name": "Frauenkirche",
+      "description": "Wiederaufgebaute Landmarke der Stadt.",
+      "location": "Dresden",
+      "lat": 51.0504,
+      "lng": 13.7373
+    },
+    {
+      "name": "Brandenburger Tor",
+      "description": "Symbol der deutschen Einheit.",
+      "location": "Berlin",
+      "lat": 52.52,
+      "lng": 13.405
+    },
+    {
+      "name": "Museumsinsel",
+      "description": "Weltkulturerbe mit fünf Museen.",
+      "location": "Berlin",
+      "lat": 52.52,
+      "lng": 13.405
+    },
+    {
+      "name": "Kölner Dom",
+      "description": "Gotische Kathedrale und UNESCO-Weltkulturerbe.",
+      "location": "Köln",
+      "lat": 50.9375,
+      "lng": 6.9603
+    },
+    {
+      "name": "Rheinpromenade",
+      "description": "Spazierwege am Fluss mit Blick auf die Altstadt.",
+      "location": "Köln",
+      "lat": 50.9375,
+      "lng": 6.9603
+    }
+  ],
+  "fuel_stations": [],
+  "weather_data": {
+    "titel": "Wetterprognose fuer deine Reise",
+    "datenbasis": "forecast",
+    "temperaturspanne": {
+      "temperatur_min": 10.2,
+      "temperatur_max": 22.3,
+      "text": "Zwischen 10.2 und 22.3 °C"
+    },
+    "anzahl_regentage": 1,
+    "kritischster_tag": {
+      "tag": 1,
+      "datum": "2026-06-05",
+      "ort": "München",
+      "grund": "Erwarteter Niederschlag"
+    },
+    "gesamtbewertung": "Die Wetterlage ist insgesamt gut planbar, aber 1 Reisetag(e) koennen feucht oder kuehl werden. Die Werte basieren auf einer echten Wettervorhersage.",
+    "wetter_risiko": "mittel",
+    "packempfehlung": "Packe eine leichte Regenjacke ein und halte einzelne Stopps flexibel.",
+    "tagesuebersicht": [
+      {
+        "tag": 1,
+        "datum": "2026-06-05",
+        "ort": "München",
+        "temperatur_min": 10.7,
+        "temperatur_max": 18.1,
+        "niederschlag_mm": 6.4,
+        "wetterbeschreibung": "Leichter Regen",
+        "datenbasis": "forecast"
+      },
+      {
+        "tag": 2,
+        "datum": "2026-06-06",
+        "ort": "München",
+        "temperatur_min": 10.2,
+        "temperatur_max": 20.7,
+        "niederschlag_mm": 0.1,
+        "wetterbeschreibung": "Leichter Regen",
+        "datenbasis": "forecast"
+      },
+      {
+        "tag": 3,
+        "datum": "2026-06-07",
+        "ort": "München",
+        "temperatur_min": 13.2,
+        "temperatur_max": 22.3,
+        "niederschlag_mm": 0.0,
+        "wetterbeschreibung": "Bedeckt",
+        "datenbasis": "forecast"
+      }
+    ]
+  },
+  "gas_station": {
+    "name": "Gebrüder Neeb GmbH & Co. KG",
+    "price": 1.838,
+    "fuel_type": "E5",
+    "distance_km": 9.2,
+    "address": "Lochhamer Schlag, Gräfelfing"
+  }
+}</script>
+  <script>
+    const tripPlan = JSON.parse(document.getElementById('trip-data').textContent);
+
+    function createListItem(text) {
+      const li = document.createElement('li');
+      li.textContent = text;
+      return li;
+    }
+
+    function initTripPanel() {
+      document.getElementById('theme-title').textContent = tripPlan.theme;
+      document.getElementById('summary').textContent = `Startort: ${tripPlan.start_location} · Dauer: ${tripPlan.duration_days} Tage · Reisezeit pro Tag: ${tripPlan.travel_time_per_day} Stunden`;
+
+      const inputParams = document.getElementById('input-params');
+      inputParams.appendChild(createListItem(`Startort: ${tripPlan.start_location}`));
+      inputParams.appendChild(createListItem(`Reisethema: ${tripPlan.theme}`));
+      inputParams.appendChild(createListItem(`Reisedauer: ${tripPlan.duration_days} Tage`));
+      inputParams.appendChild(createListItem(`Reisezeit pro Tag: ${tripPlan.travel_time_per_day} Stunden`));
+
+      // Tankstelle am Startort
+      const gasStationDiv = document.getElementById('gas-station');
+      if (tripPlan.gas_station) {
+        gasStationDiv.innerHTML = `
+          <p><strong>${tripPlan.gas_station.name || 'N/A'}</strong></p>
+          <p>Preis: ${tripPlan.gas_station.price || 'N/A'} €/L</p>
+          <p>Entfernung: ${tripPlan.gas_station.distance_km || 'N/A'} km</p>
+          <p>Adresse: ${tripPlan.gas_station.address || 'N/A'}</p>
+        `;
+      } else {
+        gasStationDiv.innerHTML = '<p>Keine Tankstellendaten verfügbar.</p>';
+      }
+
+      // Wetter & Packliste
+      const weatherDiv = document.getElementById('weather-section');
+      if (tripPlan.weather_data) {
+        let weatherHTML = `
+          <p><strong>Temperaturspanne:</strong> ${tripPlan.weather_data.temperaturspanne || 'N/A'}</p>
+          <p><strong>Regentage:</strong> ${tripPlan.weather_data.anzahl_regentage || 0}</p>
+          <p><strong>Wetterrisiko:</strong> ${tripPlan.weather_data.wetter_risiko || 'N/A'}</p>
+        `;
+        if (tripPlan.weather_data.packempfehlung) {
+          weatherHTML += `<p><strong>📦 Packliste:</strong> ${tripPlan.weather_data.packempfehlung}</p>`;
+        }
+        weatherDiv.innerHTML = weatherHTML;
+      } else {
+        weatherDiv.innerHTML = '<p>Keine Wetterdaten verfügbar.</p>';
+      }
+
+      const routeList = document.getElementById('route-list');
+      tripPlan.route_stops.forEach(stop => routeList.appendChild(createListItem(`${stop.name} (${stop.lat.toFixed(4)}, ${stop.lng.toFixed(4)})`)));
+
+      const dailyPlan = document.getElementById('daily-plan');
+      tripPlan.daily_plan.forEach(day => {
+        const card = document.createElement('div');
+        card.className = 'poi-card';
+        const title = document.createElement('h3');
+        title.textContent = day.day;
+        const content = document.createElement('p');
+        content.textContent = day.activities;
+        card.appendChild(title);
+        card.appendChild(content);
+        dailyPlan.appendChild(card);
+      });
+
+      const poiList = document.getElementById('poi-list');
+      tripPlan.pois.forEach(poi => {
+        const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(poi.name + ' ' + poi.location)}`;
+        const card = document.createElement('div');
+        card.className = 'poi-card';
+        card.innerHTML = `<strong>${poi.name}</strong><p>${poi.description}</p><p><em>${poi.location}</em></p><p><a href="${searchUrl}" target="_blank" rel="noopener noreferrer">In Google suchen</a></p>`;
+        poiList.appendChild(card);
+      });
+
+      const fuelList = document.getElementById('fuel-list');
+      if (tripPlan.fuel_stations && tripPlan.fuel_stations.length) {
+        tripPlan.fuel_stations.forEach(station => {
+          const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(station.name + ' ' + station.location + ' Tankstelle')}`;
+          const card = document.createElement('div');
+          card.className = 'poi-card';
+          card.innerHTML = `<strong>${station.name}</strong><p>${station.location}</p><p>Preis: ${station.price ? station.price.toFixed(2) + ' €' : 'n/a'}</p><p><a href="${searchUrl}" target="_blank" rel="noopener noreferrer">In Google suchen</a></p>`;
+          fuelList.appendChild(card);
+        });
+      } else {
+        fuelList.appendChild(createListItem('Keine Tankstellendaten verfügbar.'));
+      }
+    }
+
+    function initMap() {
+      initTripPanel();
+
+      const germanyBounds = L.latLngBounds([[47.2, 5.8], [55.1, 15.2]]);
+      const routeGeometry = tripPlan.route_geometry || tripPlan.route_stops.map(stop => [stop.lat, stop.lng]);
+      const map = L.map('map', { maxBounds: germanyBounds, maxBoundsViscosity: 0.8 }).fitBounds(germanyBounds);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+
+      const routeLine = L.polyline(routeGeometry, { color: 'blue', weight: 5, opacity: 0.7 }).addTo(map);
+      map.fitBounds(routeLine.getBounds(), { padding: [40, 40] });
+
+      tripPlan.route_stops.forEach((stop, index) => {
+        L.circleMarker([stop.lat, stop.lng], {
+          radius: 8,
+          color: 'navy',
+          fillColor: '#3388ff',
+          fillOpacity: 0.9,
+        }).addTo(map)
+          .bindPopup(`<strong>Etappe ${index + 1}: ${stop.name}</strong>`);
+      });
+
+      tripPlan.pois.forEach(poi => {
+        const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(poi.name + ' ' + poi.location)}`;
+        L.marker([poi.lat, poi.lng], { title: poi.name })
+          .addTo(map)
+          .bindPopup(`<strong>${poi.name}</strong><br>${poi.description}<br><em>${poi.location}</em><br><a href="${searchUrl}" target="_blank" rel="noopener noreferrer">In Google suchen</a>`);
+      });
+
+      tripPlan.fuel_stations.forEach(station => {
+        const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(station.name + ' ' + station.location + ' Tankstelle')}`;
+        L.circleMarker([station.lat, station.lng], {
+          radius: 8,
+          color: '#006600',
+          fillColor: '#00cc00',
+          fillOpacity: 0.9,
+        }).addTo(map)
+          .bindPopup(`<strong>${station.name}</strong><br>${station.location}<br>Preis: ${station.price ? station.price.toFixed(2) + ' €' : 'n/a'}<br><a href="${searchUrl}" target="_blank" rel="noopener noreferrer">In Google suchen</a>`);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', initMap);
+  </script>
+</body>
+</html>

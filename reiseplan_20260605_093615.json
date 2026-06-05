@@ -1,0 +1,169 @@
+{
+  "metadata": {
+    "created": "2026-06-05T09:36:15.019161",
+    "version": "1.0"
+  },
+  "parameters": {
+    "startort": "München",
+    "days": 2,
+    "theme": "Städte",
+    "fuel_type": "e5",
+    "consumption_per_100km": 8.0
+  },
+  "results": {
+    "gas_station": {
+      "name": "Gebrüder Neeb GmbH & Co. KG",
+      "price": 1.838,
+      "fuel_type": "E5",
+      "distance_km": 9.2,
+      "address": "Lochhamer Schlag, Gräfelfing"
+    },
+    "weather": {
+      "titel": "Wetterprognose fuer deine Reise",
+      "datenbasis": "forecast",
+      "temperaturspanne": {
+        "temperatur_min": 10.2,
+        "temperatur_max": 20.7,
+        "text": "Zwischen 10.2 und 20.7 °C"
+      },
+      "anzahl_regentage": 1,
+      "kritischster_tag": {
+        "tag": 1,
+        "datum": "2026-06-05",
+        "ort": "München",
+        "grund": "Erwarteter Niederschlag"
+      },
+      "gesamtbewertung": "Die Wetterlage ist insgesamt gut planbar, aber 1 Reisetag(e) koennen feucht oder kuehl werden. Die Werte basieren auf einer echten Wettervorhersage.",
+      "wetter_risiko": "mittel",
+      "packempfehlung": "Packe eine leichte Regenjacke ein und halte einzelne Stopps flexibel.",
+      "tagesuebersicht": [
+        {
+          "tag": 1,
+          "datum": "2026-06-05",
+          "ort": "München",
+          "temperatur_min": 10.7,
+          "temperatur_max": 18.1,
+          "niederschlag_mm": 6.4,
+          "wetterbeschreibung": "Leichter Regen",
+          "datenbasis": "forecast"
+        },
+        {
+          "tag": 2,
+          "datum": "2026-06-06",
+          "ort": "München",
+          "temperatur_min": 10.2,
+          "temperatur_max": 20.7,
+          "niederschlag_mm": 0.1,
+          "wetterbeschreibung": "Leichter Regen",
+          "datenbasis": "forecast"
+        }
+      ]
+    },
+    "route": {
+      "start_location": "München",
+      "theme": "Städte",
+      "duration_days": 2,
+      "travel_time_per_day": 8,
+      "route_stops": [
+        {
+          "name": "München",
+          "lat": 48.1351,
+          "lng": 11.582
+        },
+        {
+          "name": "Dresden",
+          "lat": 51.0504,
+          "lng": 13.7373,
+          "poi": [
+            {
+              "name": "Zwinger",
+              "description": "Barocke Schlossanlage mit Museen."
+            },
+            {
+              "name": "Frauenkirche",
+              "description": "Wiederaufgebaute Landmarke der Stadt."
+            }
+          ]
+        },
+        {
+          "name": "Berlin",
+          "lat": 52.52,
+          "lng": 13.405,
+          "poi": [
+            {
+              "name": "Brandenburger Tor",
+              "description": "Symbol der deutschen Einheit."
+            },
+            {
+              "name": "Museumsinsel",
+              "description": "Weltkulturerbe mit fünf Museen."
+            }
+          ]
+        }
+      ],
+      "route_geometry": [
+        [
+          48.1351,
+          11.582
+        ],
+        [
+          51.0504,
+          13.7373
+        ],
+        [
+          52.52,
+          13.405
+        ]
+      ],
+      "daily_plan": [
+        {
+          "day": "Tag 1",
+          "activities": "Etappe: Dresden. Plane genug Zeit für Sehenswürdigkeiten und Pausen; ca. 8 Stunden Tagesreisezeit."
+        },
+        {
+          "day": "Tag 2",
+          "activities": "Etappe: Berlin. Plane genug Zeit für Sehenswürdigkeiten und Pausen; ca. 8 Stunden Tagesreisezeit."
+        }
+      ],
+      "pois": [
+        {
+          "name": "Zwinger",
+          "description": "Barocke Schlossanlage mit Museen.",
+          "location": "Dresden",
+          "lat": 51.0504,
+          "lng": 13.7373
+        },
+        {
+          "name": "Frauenkirche",
+          "description": "Wiederaufgebaute Landmarke der Stadt.",
+          "location": "Dresden",
+          "lat": 51.0504,
+          "lng": 13.7373
+        },
+        {
+          "name": "Brandenburger Tor",
+          "description": "Symbol der deutschen Einheit.",
+          "location": "Berlin",
+          "lat": 52.52,
+          "lng": 13.405
+        },
+        {
+          "name": "Museumsinsel",
+          "description": "Weltkulturerbe mit fünf Museen.",
+          "location": "Berlin",
+          "lat": 52.52,
+          "lng": 13.405
+        }
+      ],
+      "fuel_stations": []
+    },
+    "fuel_costs": {
+      "estimated_distance_km": 3,
+      "consumption_per_100km": 8.0,
+      "liters_needed": 0.24,
+      "price_per_liter": 1.838,
+      "total_fuel_costs": 0.44,
+      "currency": "€"
+    }
+  }
+}

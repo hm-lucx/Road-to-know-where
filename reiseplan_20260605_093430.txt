@@ -1,0 +1,42 @@
+
+======================================================================
+✈️  VOLLSTÄNDIGER REISEPLAN
+======================================================================
+📋 REISEPARAMETER:
+   Startort:          Berlin
+   Dauer:             3 Tage
+   Theme:             Berge
+   Kraftstoff:        E5
+   Verbrauch:         7.5 L/100km
+
+----------------------------------------------------------------------
+🚗 TANKSTELLE AM STARTORT:
+   Name:              ORLEN Express Tankstelle
+   Preis:             1.869 €/L
+   Entfernung:        6.2 km
+   Adresse:           Otto-Suhr-Allee, Berlin
+
+----------------------------------------------------------------------
+💰 TREIBSTOFFKOSTEN:
+   Distanz:           500 km
+   Liter benötigt:    37.5 L
+   Preis pro Liter:   1.869 €
+   GESAMTKOSTEN:      💰 70.09 €
+
+----------------------------------------------------------------------
+🌤️ WETTER & PACKLISTE:
+   Datenbasis:        forecast
+   Temperaturspanne:  Zwischen 10.2 und 22.3 °C
+   Regentage:         1
+   Wetterrisiko:      MITTEL
+
+   📦 Packliste:
+      Packe eine leichte Regenjacke ein und halte einzelne Stopps flexibel.
+
+   Tagesuebersicht:
+      Tag 1: Berlin - 10.7°C bis 18.1°C, Leichter Regen
+      Tag 2: Berlin - 10.2°C bis 20.7°C, Leichter Regen
+      Tag 3: Berlin - 13.2°C bis 22.3°C, Bedeckt
+
+----------------------------------------------------------------------🗺️ Routendaten nicht verfügbar
+======================================================================

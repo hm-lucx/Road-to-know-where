@@ -1,0 +1,82 @@
+{
+  "metadata": {
+    "created": "2026-06-05T09:34:30.040472",
+    "version": "1.0"
+  },
+  "parameters": {
+    "startort": "Berlin",
+    "days": 3,
+    "theme": "Berge",
+    "fuel_type": "e5",
+    "consumption_per_100km": 7.5
+  },
+  "results": {
+    "gas_station": {
+      "name": "ORLEN Express Tankstelle",
+      "price": 1.869,
+      "fuel_type": "E5",
+      "distance_km": 6.2,
+      "address": "Otto-Suhr-Allee, Berlin"
+    },
+    "weather": {
+      "titel": "Wetterprognose fuer deine Reise",
+      "datenbasis": "forecast",
+      "temperaturspanne": {
+        "temperatur_min": 10.2,
+        "temperatur_max": 22.3,
+        "text": "Zwischen 10.2 und 22.3 °C"
+      },
+      "anzahl_regentage": 1,
+      "kritischster_tag": {
+        "tag": 1,
+        "datum": "2026-06-05",
+        "ort": "Berlin",
+        "grund": "Erwarteter Niederschlag"
+      },
+      "gesamtbewertung": "Die Wetterlage ist insgesamt gut planbar, aber 1 Reisetag(e) koennen feucht oder kuehl werden. Die Werte basieren auf einer echten Wettervorhersage.",
+      "wetter_risiko": "mittel",
+      "packempfehlung": "Packe eine leichte Regenjacke ein und halte einzelne Stopps flexibel.",
+      "tagesuebersicht": [
+        {
+          "tag": 1,
+          "datum": "2026-06-05",
+          "ort": "Berlin",
+          "temperatur_min": 10.7,
+          "temperatur_max": 18.1,
+          "niederschlag_mm": 6.4,
+          "wetterbeschreibung": "Leichter Regen",
+          "datenbasis": "forecast"
+        },
+        {
+          "tag": 2,
+          "datum": "2026-06-06",
+          "ort": "Berlin",
+          "temperatur_min": 10.2,
+          "temperatur_max": 20.7,
+          "niederschlag_mm": 0.1,
+          "wetterbeschreibung": "Leichter Regen",
+          "datenbasis": "forecast"
+        },
+        {
+          "tag": 3,
+          "datum": "2026-06-07",
+          "ort": "Berlin",
+          "temperatur_min": 13.2,
+          "temperatur_max": 22.3,
+          "niederschlag_mm": 0.0,
+          "wetterbeschreibung": "Bedeckt",
+          "datenbasis": "forecast"
+        }
+      ]
+    },
+    "route": null,
+    "fuel_costs": {
+      "estimated_distance_km": 500,
+      "consumption_per_100km": 7.5,
+      "liters_needed": 37.5,
+      "price_per_liter": 1.869,
+      "total_fuel_costs": 70.09,
+      "currency": "€"
+    }
+  }
+}

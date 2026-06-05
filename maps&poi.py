@@ -130,6 +130,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       <ul id="input-params"></ul>
     </div>
     <div class="section">
+      <h2>⛽ Tankstelle am Startort</h2>
+      <div id="gas-station"></div>
+    </div>
+    <div class="section">
+      <h2>🌤️ Wetter & Packliste</h2>
+      <div id="weather-section"></div>
+    </div>
+    <div class="section">
       <h2>Etappenziele</h2>
       <ol id="route-list"></ol>
     </div>
@@ -167,6 +175,35 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       inputParams.appendChild(createListItem(`Reisethema: ${tripPlan.theme}`));
       inputParams.appendChild(createListItem(`Reisedauer: ${tripPlan.duration_days} Tage`));
       inputParams.appendChild(createListItem(`Reisezeit pro Tag: ${tripPlan.travel_time_per_day} Stunden`));
+
+      // Tankstelle am Startort
+      const gasStationDiv = document.getElementById('gas-station');
+      if (tripPlan.gas_station) {
+        gasStationDiv.innerHTML = `
+          <p><strong>${tripPlan.gas_station.name || 'N/A'}</strong></p>
+          <p>Preis: ${tripPlan.gas_station.price || 'N/A'} €/L</p>
+          <p>Entfernung: ${tripPlan.gas_station.distance_km || 'N/A'} km</p>
+          <p>Adresse: ${tripPlan.gas_station.address || 'N/A'}</p>
+        `;
+      } else {
+        gasStationDiv.innerHTML = '<p>Keine Tankstellendaten verfügbar.</p>';
+      }
+
+      // Wetter & Packliste
+      const weatherDiv = document.getElementById('weather-section');
+      if (tripPlan.weather_data) {
+        let weatherHTML = `
+          <p><strong>Temperaturspanne:</strong> ${tripPlan.weather_data.temperaturspanne.text || tripPlan.weather_data.temperaturspanne || 'N/A'}</p>
+          <p><strong>Regentage:</strong> ${tripPlan.weather_data.anzahl_regentage || 0}</p>
+          <p><strong>Wetterrisiko:</strong> ${tripPlan.weather_data.wetter_risiko || 'N/A'}</p>
+        `;
+        if (tripPlan.weather_data.packempfehlung) {
+          weatherHTML += `<p><strong>📦 Packliste:</strong> ${tripPlan.weather_data.packempfehlung}</p>`;
+        }
+        weatherDiv.innerHTML = weatherHTML;
+      } else {
+        weatherDiv.innerHTML = '<p>Keine Wetterdaten verfügbar.</p>';
+      }
 
       const routeList = document.getElementById('route-list');
       tripPlan.route_stops.forEach(stop => routeList.appendChild(createListItem(`${stop.name} (${stop.lat.toFixed(4)}, ${stop.lng.toFixed(4)})`)));
@@ -461,6 +498,8 @@ def plan_trip(data: Dict[str, Any]) -> Dict[str, Any]:
     theme = data.get("theme", "Städte")
     duration_days = int(data.get("duration_days", 3))
     travel_time_per_day = int(data.get("travel_time_per_day", 6))
+    weather_data = data.get("weather_data", None)
+    gas_station = data.get("gas_station", None)
 
     route_stops = select_route_stops(start_location, theme, duration_days, travel_time_per_day)
     route_geometry = get_osrm_route_geometry(route_stops)
@@ -479,6 +518,8 @@ def plan_trip(data: Dict[str, Any]) -> Dict[str, Any]:
         "daily_plan": daily_plan,
         "pois": pois,
         "fuel_stations": fuel_stations,
+        "weather_data": weather_data,
+        "gas_station": gas_station,
     }
 
 
