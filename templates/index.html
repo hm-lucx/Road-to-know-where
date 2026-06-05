@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Road to KnowWhere</title>
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <header class="hero" id="landing">
+    <nav class="top-nav">
+      <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="Road to KnowWhere Logo" class="nav-logo">
+      <span>Road to KnowWhere</span>
+    </nav>
+
+    <div class="hero-inner">
+      <div class="brand-panel">
+        <img src="{{ url_for('static', filename='logo.jpeg') }}" alt="Road to KnowWhere Logo" class="brand-logo">
+      </div>
+      <div class="hero-copy">
+        <p class="eyebrow">Themenbasierter Routenplaner</p>
+        <h1>Plane deinen Roadtrip nach Interessen, Wetter und Strecke.</h1>
+        <p class="lead">Wähle Startort, Reisedauer und Thema. Unser Orchestrator verbindet Route, Wetter, Tankdaten und Sehenswürdigkeiten zu einem fertigen Reiseplan.</p>
+        <button class="primary-btn" id="startButton" type="button">Let’s get started</button>
+      </div>
+    </div>
+
+    <div class="theme-strip" aria-label="Themenbereiche">
+      <div><span class="theme-icon party">◉</span><strong>Party</strong></div>
+      <div><span class="theme-icon culture">▣</span><strong>Kultur</strong></div>
+      <div><span class="theme-icon lakes">≈</span><strong>Seen</strong></div>
+      <div><span class="theme-icon mountains">▲</span><strong>Berge</strong></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="planner-section" id="planner">
+      <div class="section-head">
+        <p class="eyebrow">Route konfigurieren</p>
+        <h2>Deine Reiseparameter</h2>
+        <p>Die Felder passen zu den aktuellen Orchestrator-Inputs: Startort, Thema, Dauer, Tagesreisezeit, Startdatum und Kraftstoff.</p>
+      </div>
+
+      <form id="tripForm" class="trip-form">
+        <div class="field">
+          <label for="startLocation">Startort</label>
+          <input id="startLocation" name="start_location" type="text" value="München" required>
+        </div>
+        <div class="field">
+          <label for="durationDays">Reisetage</label>
+          <input id="durationDays" name="duration_days" type="number" min="1" max="14" value="4" required>
+        </div>
+        <div class="field">
+          <label for="startDate">Startdatum</label>
+          <input id="startDate" name="start_date" type="date" value="2026-06-06" required>
+        </div>
+        <div class="field">
+          <label for="travelTime">Reisezeit pro Tag</label>
+          <input id="travelTime" name="travel_time_per_day" type="number" min="1" max="12" value="6" required>
+        </div>
+        <div class="field">
+          <label for="fuelType">Kraftstoff</label>
+          <select id="fuelType" name="fuel_type">
+            <option value="e5">E5</option>
+            <option value="e10">E10</option>
+            <option value="diesel">Diesel</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="consumption">Verbrauch l/100 km</label>
+          <input id="consumption" name="fuel_consumption_l_per_100km" type="number" min="1" max="25" step="0.1" value="5">
+        </div>
+        <div class="field">
+          <label for="budget">Budget optional</label>
+          <input id="budget" name="budget" type="number" min="0" step="50" placeholder="z.B. 600">
+        </div>
+        <div class="field">
+          <label for="travelStyle">Reisestil</label>
+          <select id="travelStyle" name="travel_style">
+            <option>Ausgewogen</option>
+            <option>Entspannt</option>
+            <option>Aktiv</option>
+            <option>Budgetbewusst</option>
+          </select>
+        </div>
+
+        <fieldset class="interest-field">
+          <legend>Interessen</legend>
+          <label><input type="radio" name="interest" value="Städte" checked><span>Kultur / Städte</span></label>
+          <label><input type="radio" name="interest" value="Berge"><span>Berge</span></label>
+          <label><input type="radio" name="interest" value="Camping"><span>Natur / Camping</span></label>
+          <label><input type="radio" name="interest" value="besondere bauten"><span>Besondere Bauten</span></label>
+        </fieldset>
+
+        <button class="primary-btn form-submit" type="submit">Route planen</button>
+      </form>
+    </section>
+
+    <section class="loading-section hidden" id="loading">
+      <div class="loader"></div>
+      <h2>Orchestrator plant deine Route...</h2>
+      <p>Agents für Route, Wetter und Tankstellen werden ausgeführt.</p>
+    </section>
+
+    <section class="error-section hidden" id="errorBox"></section>
+
+    <section class="results hidden" id="results">
+      <div class="result-hero">
+        <div>
+          <p class="eyebrow">Ergebnis</p>
+          <h2 id="resultTitle">Dein Roadtrip</h2>
+          <p id="resultSummary"></p>
+        </div>
+        <div class="result-metrics" id="resultMetrics"></div>
+      </div>
+
+      <div id="map"></div>
+
+      <div class="content-grid">
+        <section class="result-card">
+          <h3>Tagesetappen</h3>
+          <div id="dailyPlan"></div>
+        </section>
+        <section class="result-card">
+          <h3>Wetter-Kachel</h3>
+          <div id="weatherCard"></div>
+        </section>
+        <section class="result-card">
+          <h3>Tank- und Kosteninfos</h3>
+          <div id="fuelCard"></div>
+        </section>
+        <section class="result-card wide">
+          <h3>Sehenswürdigkeiten</h3>
+          <div class="poi-grid" id="poiGrid"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,1088 @@
+[
+  {
+    "reisetage": 1,
+    "status": "ok",
+    "laufzeit_sekunden": 1.1354,
+    "agent_aufrufe": 3,
+    "funktionsaufrufe": 981,
+    "prompt_tokens": 36,
+    "completion_tokens": 671,
+    "total_tokens": 707,
+    "tokens_sind_geschaetzt": true,
+    "input_bytes": 143,
+    "output_bytes": 2074,
+    "agent_messungen": [
+      {
+        "agent": "maps_poi",
+        "laufzeit_sekunden": 0.106991208,
+        "input_bytes": 96,
+        "output_bytes": 890,
+        "status": "ok",
+        "fehler": null
+      },
+      {
+        "agent": "wetter",
+        "laufzeit_sekunden": 0.35039875,
+        "input_bytes": 142,
+        "output_bytes": 811,
+        "status": "ok",
+        "fehler": null
+      },
+      {
+        "agent": "tankstelle",
+        "laufzeit_sekunden": 0.6540832500000001,
+        "input_bytes": 39,
+        "output_bytes": 139,
+        "status": "ok",
+        "fehler": null
+      }
+    ],
+    "route_stops": 2,
+    "daily_plan_days": 1,
+    "poi_count": 2,
+    "weather_days": 1,
+    "errors": [],
+    "error": null,
+    "result": {
+      "status": "ok",
+      "input": {
+        "start_location": "München",
+        "theme": "Städte",
+        "duration_days": 1,
+        "travel_time_per_day": 6,
+        "fuel_type": "e5",
+        "start_date": "2026-06-06"
+      },
+      "frontend_plan": {
+        "start_location": "München",
+        "theme": "Städte",
+        "duration_days": 1,
+        "travel_time_per_day": 6,
+        "route_stops": [
+          {
+            "name": "München",
+            "lat": 48.1351,
+            "lng": 11.582
+          },
+          {
+            "name": "Dresden",
+            "lat": 51.0504,
+            "lng": 13.7373,
+            "poi": [
+              {
+                "name": "Zwinger",
+                "description": "Barocke Schlossanlage mit Museen."
+              },
+              {
+                "name": "Frauenkirche",
+                "description": "Wiederaufgebaute Landmarke der Stadt."
+              }
+            ]
+          }
+        ],
+        "route_geometry": [
+          [
+            48.1351,
+            11.582
+          ],
+          [
+            51.0504,
+            13.7373
+          ]
+        ],
+        "daily_plan": [
+          {
+            "day": "Tag 1",
+            "activities": "Etappe: Dresden. Plane genug Zeit für Sehenswürdigkeiten und Pausen; ca. 6 Stunden Tagesreisezeit."
+          }
+        ],
+        "pois": [
+          {
+            "name": "Zwinger",
+            "description": "Barocke Schlossanlage mit Museen.",
+            "location": "Dresden",
+            "lat": 51.0504,
+            "lng": 13.7373
+          },
+          {
+            "name": "Frauenkirche",
+            "description": "Wiederaufgebaute Landmarke der Stadt.",
+            "location": "Dresden",
+            "lat": 51.0504,
+            "lng": 13.7373
+          }
+        ],
+        "fuel_stations": [],
+        "weather": {
+          "titel": "Wetterprognose fuer deine Reise",
+          "datenbasis": "forecast",
+          "temperaturspanne": {
+            "temperatur_min": 11.0,
+            "temperatur_max": 24.0,
+            "text": "Zwischen 11 und 24 °C"
+          },
+          "anzahl_regentage": 1,
+          "kritischster_tag": {
+            "tag": 1,
+            "datum": "2026-06-06",
+            "ort": "Dresden",
+            "grund": "Hoher erwarteter Niederschlag"
+          },
+          "gesamtbewertung": "Die Reise hat erhoehtes Wetterrisiko, besonders rund um Dresden. Die Werte basieren auf einer echten Wettervorhersage.",
+          "wetter_risiko": "hoch",
+          "packempfehlung": "Packe Regenjacke, warme Schichten und wetterfeste Schuhe ein. Plane fuer Tag 1 eine flexible Alternative.",
+          "tagesuebersicht": [
+            {
+              "tag": 1,
+              "datum": "2026-06-06",
+              "ort": "Dresden",
+              "temperatur_min": 11.0,
+              "temperatur_max": 24.0,
+              "niederschlag_mm": 8.5,
+              "wetterbeschreibung": "Gewitter",
+              "datenbasis": "forecast"
+            }
+          ]
+        },
+        "fuel_summary": {
+          "name": "Gebrüder Neeb GmbH & Co. KG",
+          "price": 1.838,
+          "fuel_type": "E5",
+          "distance_km": 9.2,
+          "address": "Lochhamer Schlag, Gräfelfing"
+        },
+        "errors": []
+      },
+      "telemetry": {
+        "laufzeit_sekunden": 1.1354,
+        "agent_aufrufe": 3,
+        "funktionsaufrufe": 0,
+        "input_bytes": 143,
+        "output_bytes": 2074,
+        "llm_prompt_tokens": 0,
+        "llm_completion_tokens": 0,
+        "llm_total_tokens": 0,
+        "token_hinweis": "Keine LLM-Aufrufe gefunden; Werte sind 0. Payload-Tokens sind geschaetzt.",
+        "geschaetzte_payload_tokens": 552,
+        "agent_messungen": [
+          {
+            "agent": "maps_poi",
+            "laufzeit_sekunden": 0.106991208,
+            "input_bytes": 96,
+            "output_bytes": 890,
+            "status": "ok",
+            "fehler": null
+          },
+          {
+            "agent": "wetter",
+            "laufzeit_sekunden": 0.35039875,
+            "input_bytes": 142,
+            "output_bytes": 811,
+            "status": "ok",
+            "fehler": null
+          },
+          {
+            "agent": "tankstelle",
+            "laufzeit_sekunden": 0.6540832500000001,
+            "input_bytes": 39,
+            "output_bytes": 139,
+            "status": "ok",
+            "fehler": null
+          }
+        ],
+        "fehler": []
+      }
+    }
+  },
+  {
+    "reisetage": 3,
+    "status": "ok",
+    "laufzeit_sekunden": 21.5733,
+    "agent_aufrufe": 3,
+    "funktionsaufrufe": 745,
+    "prompt_tokens": 36,
+    "completion_tokens": 1100,
+    "total_tokens": 1136,
+    "tokens_sind_geschaetzt": true,
+    "input_bytes": 143,
+    "output_bytes": 3791,
+    "agent_messungen": [
+      {
+        "agent": "maps_poi",
+        "laufzeit_sekunden": 0.092597708,
+        "input_bytes": 96,
+        "output_bytes": 2200,
+        "status": "ok",
+        "fehler": null
+      },
+      {
+        "agent": "wetter",
+        "laufzeit_sekunden": 20.760618500000003,
+        "input_bytes": 378,
+        "output_bytes": 1218,
+        "status": "ok",
+        "fehler": null
+      },
+      {
+        "agent": "tankstelle",
+        "laufzeit_sekunden": 0.7170608330000015,
+        "input_bytes": 39,
+        "output_bytes": 139,
+        "status": "ok",
+        "fehler": null
+      }
+    ],
+    "route_stops": 4,
+    "daily_plan_days": 3,
+    "poi_count": 6,
+    "weather_days": 3,
+    "errors": [],
+    "error": null,
+    "result": {
+      "status": "ok",
+      "input": {
+        "start_location": "München",
+        "theme": "Städte",
+        "duration_days": 3,
+        "travel_time_per_day": 6,
+        "fuel_type": "e5",
+        "start_date": "2026-06-06"
+      },
+      "frontend_plan": {
+        "start_location": "München",
+        "theme": "Städte",
+        "duration_days": 3,
+        "travel_time_per_day": 6,
+        "route_stops": [
+          {
+            "name": "München",
+            "lat": 48.1351,
+            "lng": 11.582
+          },
+          {
+            "name": "Dresden",
+            "lat": 51.0504,
+            "lng": 13.7373,
+            "poi": [
+              {
+                "name": "Zwinger",
+                "description": "Barocke Schlossanlage mit Museen."
+              },
+              {
+                "name": "Frauenkirche",
+                "description": "Wiederaufgebaute Landmarke der Stadt."
+              }
+            ]
+          },
+          {
+            "name": "Berlin",
+            "lat": 52.52,
+            "lng": 13.405,
+            "poi": [
+              {
+                "name": "Brandenburger Tor",
+                "description": "Symbol der deutschen Einheit."
+              },
+              {
+                "name": "Museumsinsel",
+                "description": "Weltkulturerbe mit fünf Museen."
+              }
+            ]
+          },
+          {
+            "name": "Köln",
+            "lat": 50.9375,
+            "lng": 6.9603,
+            "poi": [
+              {
+                "name": "Kölner Dom",
+                "description": "Gotische Kathedrale und UNESCO-Weltkulturerbe."
+              },
+              {
+                "name": "Rheinpromenade",
+                "description": "Spazierwege am Fluss mit Blick auf die Altstadt."
+              }
+            ]
+          }
+        ],
+        "route_geometry": [
+          [
+            48.1351,
+            11.582
+          ],
+          [
+            51.0504,
+            13.7373
+          ],
+          [
+            52.52,
+            13.405
+          ],
+          [
+            50.9375,
+            6.9603
+          ]
+        ],
+        "daily_plan": [
+          {
+            "day": "Tag 1",
+            "activities": "Etappe: Dresden. Plane genug Zeit für Sehenswürdigkeiten und Pausen; ca. 6 Stunden Tagesreisezeit."
+          },
+          {
+            "day": "Tag 2",
+            "activities": "Etappe: Berlin. Plane genug Zeit für Sehenswürdigkeiten und Pausen; ca. 6 Stunden Tagesreisezeit."
+          },
+          {
+            "day": "Tag 3",
+            "activities": "Etappe: Köln. Plane genug Zeit für Sehenswürdigkeiten und Pausen; ca. 6 Stunden Tagesreisezeit."
+          }
+        ],
+        "pois": [
+          {
+            "name": "Zwinger",
+            "description": "Barocke Schlossanlage mit Museen.",
+            "location": "Dresden",
+            "lat": 51.0504,
+            "lng": 13.7373
+          },
+          {
+            "name": "Frauenkirche",
+            "description": "Wiederaufgebaute Landmarke der Stadt.",
+            "location": "Dresden",
+            "lat": 51.0504,
+            "lng": 13.7373
+          },
+          {
+            "name": "Brandenburger Tor",
+            "description": "Symbol der deutschen Einheit.",
+            "location": "Berlin",
+            "lat": 52.52,
+            "lng": 13.405
+          },
+          {
+            "name": "Museumsinsel",
+            "description": "Weltkulturerbe mit fünf Museen.",
+            "location": "Berlin",
+            "lat": 52.52,
+            "lng": 13.405
+          },
+          {
+            "name": "Kölner Dom",
+            "description": "Gotische Kathedrale und UNESCO-Weltkulturerbe.",
+            "location": "Köln",
+            "lat": 50.9375,
+            "lng": 6.9603
+          },
+          {
+            "name": "Rheinpromenade",
+            "description": "Spazierwege am Fluss mit Blick auf die Altstadt.",
+            "location": "Köln",
+            "lat": 50.9375,
+            "lng": 6.9603
+          }
+        ],
+        "fuel_stations": [],
+        "weather": {
+          "titel": "Wetterprognose fuer deine Reise",
+          "datenbasis": "mixed",
+          "temperaturspanne": {
+            "temperatur_min": 11.0,
+            "temperatur_max": 24.0,
+            "text": "Zwischen 11 und 24 °C"
+          },
+          "anzahl_regentage": 2,
+          "kritischster_tag": {
+            "tag": 1,
+            "datum": "2026-06-06",
+            "ort": "Dresden",
+            "grund": "Hoher erwarteter Niederschlag"
+          },
+          "gesamtbewertung": "Die Reise hat erhoehtes Wetterrisiko, besonders rund um Dresden. Die Reise enthaelt echte Vorhersagen und historische Schaetzungen.",
+          "wetter_risiko": "hoch",
+          "packempfehlung": "Packe Regenjacke, warme Schichten und wetterfeste Schuhe ein. Plane fuer Tag 1 eine flexible Alternative.",
+          "tagesuebersicht": [
+            {
+              "tag": 1,
+              "datum": "2026-06-06",
+              "ort": "Dresden",
+              "temperatur_min": 11.0,
+              "temperatur_max": 24.0,
+              "niederschlag_mm": 8.5,
+              "wetterbeschreibung": "Gewitter",
+              "datenbasis": "forecast"
+            },
+            {
+              "tag": 2,
+              "datum": "2026-06-07",
+              "ort": "Berlin",
+              "temperatur_min": 16.4,
+              "temperatur_max": 22.4,
+              "niederschlag_mm": 1.0,
+              "wetterbeschreibung": "Leichter Regen",
+              "datenbasis": "forecast"
+            },
+            {
+              "tag": 3,
+              "datum": "2026-06-08",
+              "ort": "Köln",
+              "temperatur_min": null,
+              "temperatur_max": null,
+              "niederschlag_mm": null,
+              "wetterbeschreibung": "Keine Wetterdaten verfuegbar",
+              "datenbasis": "unavailable"
+            }
+          ]
+        },
+        "fuel_summary": {
+          "name": "Gebrüder Neeb GmbH & Co. KG",
+          "price": 1.838,
+          "fuel_type": "E5",
+          "distance_km": 9.2,
+          "address": "Lochhamer Schlag, Gräfelfing"
+        },
+        "errors": []
+      },
+      "telemetry": {
+        "laufzeit_sekunden": 21.5733,
+        "agent_aufrufe": 3,
+        "funktionsaufrufe": 0,
+        "input_bytes": 143,
+        "output_bytes": 3791,
+        "llm_prompt_tokens": 0,
+        "llm_completion_tokens": 0,
+        "llm_total_tokens": 0,
+        "token_hinweis": "Keine LLM-Aufrufe gefunden; Werte sind 0. Payload-Tokens sind geschaetzt.",
+        "geschaetzte_payload_tokens": 978,
+        "agent_messungen": [
+          {
+            "agent": "maps_poi",
+            "laufzeit_sekunden": 0.092597708,
+            "input_bytes": 96,
+            "output_bytes": 2200,
+            "status": "ok",
+            "fehler": null
+          },
+          {
+            "agent": "wetter",
+            "laufzeit_sekunden": 20.760618500000003,
+            "input_bytes": 378,
+            "output_bytes": 1218,
+            "status": "ok",
+            "fehler": null
+          },
+          {
+            "agent": "tankstelle",
+            "laufzeit_sekunden": 0.7170608330000015,
+            "input_bytes": 39,
+            "output_bytes": 139,
+            "status": "ok",
+            "fehler": null
+          }
+        ],
+        "fehler": []
+      }
+    }
+  },
+  {
+    "reisetage": 5,
+    "status": "ok",
+    "laufzeit_sekunden": 1.705,
+    "agent_aufrufe": 3,
+    "funktionsaufrufe": 762,
+    "prompt_tokens": 36,
+    "completion_tokens": 1164,
+    "total_tokens": 1200,
+    "tokens_sind_geschaetzt": true,
+    "input_bytes": 143,
+    "output_bytes": 4045,
+    "agent_messungen": [
+      {
+        "agent": "maps_poi",
+        "laufzeit_sekunden": 0.0917716249999998,
+        "input_bytes": 96,
+        "output_bytes": 2476,
+        "status": "ok",
+        "fehler": null
+      },
+      {
+        "agent": "wetter",
+        "laufzeit_sekunden": 0.9251035419999987,
+        "input_bytes": 378,
+        "output_bytes": 1196,
+        "status": "ok",
+        "fehler": null
+      },
+      {
+        "agent": "tankstelle",
+        "laufzeit_sekunden": 0.6855216669999997,
+        "input_bytes": 39,
+        "output_bytes": 139,
+        "status": "ok",
+        "fehler": null
+      }
+    ],
+    "route_stops": 4,
+    "daily_plan_days": 5,
+    "poi_count": 6,
+    "weather_days": 3,
+    "errors": [],
+    "error": null,
+    "result": {
+      "status": "ok",
+      "input": {
+        "start_location": "München",
+        "theme": "Städte",
+        "duration_days": 5,
+        "travel_time_per_day": 6,
+        "fuel_type": "e5",
+        "start_date": "2026-06-06"
+      },
+      "frontend_plan": {
+        "start_location": "München",
+        "theme": "Städte",
+        "duration_days": 5,
+        "travel_time_per_day": 6,
+        "route_stops": [
+          {
+            "name": "München",
+            "lat": 48.1351,
+            "lng": 11.582
+          },
+          {
+            "name": "Dresden",
+            "lat": 51.0504,
+            "lng": 13.7373,
+            "poi": [
+              {
+                "name": "Zwinger",
+                "description": "Barocke Schlossanlage mit Museen."
+              },
+              {
+                "name": "Frauenkirche",
+                "description": "Wiederaufgebaute Landmarke der Stadt."
+              }
+            ]
+          },
+          {
+            "name": "Berlin",
+            "lat": 52.52,
+            "lng": 13.405,
+            "poi": [
+              {
+                "name": "Brandenburger Tor",
+                "description": "Symbol der deutschen Einheit."
+              },
+              {
+                "name": "Museumsinsel",
+                "description": "Weltkulturerbe mit fünf Museen."
+              }
+            ]
+          },
+          {
+            "name": "Köln",
+            "lat": 50.9375,
+            "lng": 6.9603,
+            "poi": [
+              {
+                "name": "Kölner Dom",
+                "description": "Gotische Kathedrale und UNESCO-Weltkulturerbe."
+              },
+              {
+                "name": "Rheinpromenade",
+                "description": "Spazierwege am Fluss mit Blick auf die Altstadt."
+              }
+            ]
+          }
+        ],
+        "route_geometry": [
+          [
+            48.1351,
+            11.582
+          ],
+          [
+            51.0504,
+            13.7373
+          ],
+          [
+            52.52,
+            13.405
+          ],
+          [
+            50.9375,
+            6.9603
+          ]
+        ],
+        "daily_plan": [
+          {
+            "day": "Tag 1",
+            "activities": "Etappe: Dresden. Plane genug Zeit für Sehenswürdigkeiten und Pausen; ca. 6 Stunden Tagesreisezeit."
+          },
+          {
+            "day": "Tag 2",
+            "activities": "Etappe: Berlin. Plane genug Zeit für Sehenswürdigkeiten und Pausen; ca. 6 Stunden Tagesreisezeit."
+          },
+          {
+            "day": "Tag 3",
+            "activities": "Etappe: Köln. Plane genug Zeit für Sehenswürdigkeiten und Pausen; ca. 6 Stunden Tagesreisezeit."
+          },
+          {
+            "day": "Tag 4",
+            "activities": "Ruhetag oder ausführliche Besichtigung vor Ort. Genieße die Umgebung und versuche lokale Highlights."
+          },
+          {
+            "day": "Tag 5",
+            "activities": "Ruhetag oder ausführliche Besichtigung vor Ort. Genieße die Umgebung und versuche lokale Highlights."
+          }
+        ],
+        "pois": [
+          {
+            "name": "Zwinger",
+            "description": "Barocke Schlossanlage mit Museen.",
+            "location": "Dresden",
+            "lat": 51.0504,
+            "lng": 13.7373
+          },
+          {
+            "name": "Frauenkirche",
+            "description": "Wiederaufgebaute Landmarke der Stadt.",
+            "location": "Dresden",
+            "lat": 51.0504,
+            "lng": 13.7373
+          },
+          {
+            "name": "Brandenburger Tor",
+            "description": "Symbol der deutschen Einheit.",
+            "location": "Berlin",
+            "lat": 52.52,
+            "lng": 13.405
+          },
+          {
+            "name": "Museumsinsel",
+            "description": "Weltkulturerbe mit fünf Museen.",
+            "location": "Berlin",
+            "lat": 52.52,
+            "lng": 13.405
+          },
+          {
+            "name": "Kölner Dom",
+            "description": "Gotische Kathedrale und UNESCO-Weltkulturerbe.",
+            "location": "Köln",
+            "lat": 50.9375,
+            "lng": 6.9603
+          },
+          {
+            "name": "Rheinpromenade",
+            "description": "Spazierwege am Fluss mit Blick auf die Altstadt.",
+            "location": "Köln",
+            "lat": 50.9375,
+            "lng": 6.9603
+          }
+        ],
+        "fuel_stations": [],
+        "weather": {
+          "titel": "Wetterprognose fuer deine Reise",
+          "datenbasis": "forecast",
+          "temperaturspanne": {
+            "temperatur_min": 11.0,
+            "temperatur_max": 24.0,
+            "text": "Zwischen 11 und 24 °C"
+          },
+          "anzahl_regentage": 2,
+          "kritischster_tag": {
+            "tag": 1,
+            "datum": "2026-06-06",
+            "ort": "Dresden",
+            "grund": "Hoher erwarteter Niederschlag"
+          },
+          "gesamtbewertung": "Die Reise hat erhoehtes Wetterrisiko, besonders rund um Dresden. Die Werte basieren auf einer echten Wettervorhersage.",
+          "wetter_risiko": "hoch",
+          "packempfehlung": "Packe Regenjacke, warme Schichten und wetterfeste Schuhe ein. Plane fuer Tag 1 eine flexible Alternative.",
+          "tagesuebersicht": [
+            {
+              "tag": 1,
+              "datum": "2026-06-06",
+              "ort": "Dresden",
+              "temperatur_min": 11.0,
+              "temperatur_max": 24.0,
+              "niederschlag_mm": 8.5,
+              "wetterbeschreibung": "Gewitter",
+              "datenbasis": "forecast"
+            },
+            {
+              "tag": 2,
+              "datum": "2026-06-07",
+              "ort": "Berlin",
+              "temperatur_min": 16.4,
+              "temperatur_max": 22.4,
+              "niederschlag_mm": 1.0,
+              "wetterbeschreibung": "Leichter Regen",
+              "datenbasis": "forecast"
+            },
+            {
+              "tag": 3,
+              "datum": "2026-06-08",
+              "ort": "Köln",
+              "temperatur_min": 11.6,
+              "temperatur_max": 22.7,
+              "niederschlag_mm": 0.4,
+              "wetterbeschreibung": "Leichter Nieselregen",
+              "datenbasis": "forecast"
+            }
+          ]
+        },
+        "fuel_summary": {
+          "name": "Gebrüder Neeb GmbH & Co. KG",
+          "price": 1.838,
+          "fuel_type": "E5",
+          "distance_km": 9.2,
+          "address": "Lochhamer Schlag, Gräfelfing"
+        },
+        "errors": []
+      },
+      "telemetry": {
+        "laufzeit_sekunden": 1.705,
+        "agent_aufrufe": 3,
+        "funktionsaufrufe": 0,
+        "input_bytes": 143,
+        "output_bytes": 4045,
+        "llm_prompt_tokens": 0,
+        "llm_completion_tokens": 0,
+        "llm_total_tokens": 0,
+        "token_hinweis": "Keine LLM-Aufrufe gefunden; Werte sind 0. Payload-Tokens sind geschaetzt.",
+        "geschaetzte_payload_tokens": 1041,
+        "agent_messungen": [
+          {
+            "agent": "maps_poi",
+            "laufzeit_sekunden": 0.0917716249999998,
+            "input_bytes": 96,
+            "output_bytes": 2476,
+            "status": "ok",
+            "fehler": null
+          },
+          {
+            "agent": "wetter",
+            "laufzeit_sekunden": 0.9251035419999987,
+            "input_bytes": 378,
+            "output_bytes": 1196,
+            "status": "ok",
+            "fehler": null
+          },
+          {
+            "agent": "tankstelle",
+            "laufzeit_sekunden": 0.6855216669999997,
+            "input_bytes": 39,
+            "output_bytes": 139,
+            "status": "ok",
+            "fehler": null
+          }
+        ],
+        "fehler": []
+      }
+    }
+  },
+  {
+    "reisetage": 7,
+    "status": "ok",
+    "laufzeit_sekunden": 21.609,
+    "agent_aufrufe": 3,
+    "funktionsaufrufe": 742,
+    "prompt_tokens": 36,
+    "completion_tokens": 1236,
+    "total_tokens": 1272,
+    "tokens_sind_geschaetzt": true,
+    "input_bytes": 143,
+    "output_bytes": 4343,
+    "agent_messungen": [
+      {
+        "agent": "maps_poi",
+        "laufzeit_sekunden": 0.15807979199999878,
+        "input_bytes": 96,
+        "output_bytes": 2752,
+        "status": "ok",
+        "fehler": null
+      },
+      {
+        "agent": "wetter",
+        "laufzeit_sekunden": 20.681020166,
+        "input_bytes": 378,
+        "output_bytes": 1218,
+        "status": "ok",
+        "fehler": null
+      },
+      {
+        "agent": "tankstelle",
+        "laufzeit_sekunden": 0.7668834579999952,
+        "input_bytes": 39,
+        "output_bytes": 139,
+        "status": "ok",
+        "fehler": null
+      }
+    ],
+    "route_stops": 4,
+    "daily_plan_days": 7,
+    "poi_count": 6,
+    "weather_days": 3,
+    "errors": [],
+    "error": null,
+    "result": {
+      "status": "ok",
+      "input": {
+        "start_location": "München",
+        "theme": "Städte",
+        "duration_days": 7,
+        "travel_time_per_day": 6,
+        "fuel_type": "e5",
+        "start_date": "2026-06-06"
+      },
+      "frontend_plan": {
+        "start_location": "München",
+        "theme": "Städte",
+        "duration_days": 7,
+        "travel_time_per_day": 6,
+        "route_stops": [
+          {
+            "name": "München",
+            "lat": 48.1351,
+            "lng": 11.582
+          },
+          {
+            "name": "Dresden",
+            "lat": 51.0504,
+            "lng": 13.7373,
+            "poi": [
+              {
+                "name": "Zwinger",
+                "description": "Barocke Schlossanlage mit Museen."
+              },
+              {
+                "name": "Frauenkirche",
+                "description": "Wiederaufgebaute Landmarke der Stadt."
+              }
+            ]
+          },
+          {
+            "name": "Berlin",
+            "lat": 52.52,
+            "lng": 13.405,
+            "poi": [
+              {
+                "name": "Brandenburger Tor",
+                "description": "Symbol der deutschen Einheit."
+              },
+              {
+                "name": "Museumsinsel",
+                "description": "Weltkulturerbe mit fünf Museen."
+              }
+            ]
+          },
+          {
+            "name": "Köln",
+            "lat": 50.9375,
+            "lng": 6.9603,
+            "poi": [
+              {
+                "name": "Kölner Dom",
+                "description": "Gotische Kathedrale und UNESCO-Weltkulturerbe."
+              },
+              {
+                "name": "Rheinpromenade",
+                "description": "Spazierwege am Fluss mit Blick auf die Altstadt."
+              }
+            ]
+          }
+        ],
+        "route_geometry": [
+          [
+            48.1351,
+            11.582
+          ],
+          [
+            51.0504,
+            13.7373
+          ],
+          [
+            52.52,
+            13.405
+          ],
+          [
+            50.9375,
+            6.9603
+          ]
+        ],
+        "daily_plan": [
+          {
+            "day": "Tag 1",
+            "activities": "Etappe: Dresden. Plane genug Zeit für Sehenswürdigkeiten und Pausen; ca. 6 Stunden Tagesreisezeit."
+          },
+          {
+            "day": "Tag 2",
+            "activities": "Etappe: Berlin. Plane genug Zeit für Sehenswürdigkeiten und Pausen; ca. 6 Stunden Tagesreisezeit."
+          },
+          {
+            "day": "Tag 3",
+            "activities": "Etappe: Köln. Plane genug Zeit für Sehenswürdigkeiten und Pausen; ca. 6 Stunden Tagesreisezeit."
+          },
+          {
+            "day": "Tag 4",
+            "activities": "Ruhetag oder ausführliche Besichtigung vor Ort. Genieße die Umgebung und versuche lokale Highlights."
+          },
+          {
+            "day": "Tag 5",
+            "activities": "Ruhetag oder ausführliche Besichtigung vor Ort. Genieße die Umgebung und versuche lokale Highlights."
+          },
+          {
+            "day": "Tag 6",
+            "activities": "Ruhetag oder ausführliche Besichtigung vor Ort. Genieße die Umgebung und versuche lokale Highlights."
+          },
+          {
+            "day": "Tag 7",
+            "activities": "Ruhetag oder ausführliche Besichtigung vor Ort. Genieße die Umgebung und versuche lokale Highlights."
+          }
+        ],
+        "pois": [
+          {
+            "name": "Zwinger",
+            "description": "Barocke Schlossanlage mit Museen.",
+            "location": "Dresden",
+            "lat": 51.0504,
+            "lng": 13.7373
+          },
+          {
+            "name": "Frauenkirche",
+            "description": "Wiederaufgebaute Landmarke der Stadt.",
+            "location": "Dresden",
+            "lat": 51.0504,
+            "lng": 13.7373
+          },
+          {
+            "name": "Brandenburger Tor",
+            "description": "Symbol der deutschen Einheit.",
+            "location": "Berlin",
+            "lat": 52.52,
+            "lng": 13.405
+          },
+          {
+            "name": "Museumsinsel",
+            "description": "Weltkulturerbe mit fünf Museen.",
+            "location": "Berlin",
+            "lat": 52.52,
+            "lng": 13.405
+          },
+          {
+            "name": "Kölner Dom",
+            "description": "Gotische Kathedrale und UNESCO-Weltkulturerbe.",
+            "location": "Köln",
+            "lat": 50.9375,
+            "lng": 6.9603
+          },
+          {
+            "name": "Rheinpromenade",
+            "description": "Spazierwege am Fluss mit Blick auf die Altstadt.",
+            "location": "Köln",
+            "lat": 50.9375,
+            "lng": 6.9603
+          }
+        ],
+        "fuel_stations": [],
+        "weather": {
+          "titel": "Wetterprognose fuer deine Reise",
+          "datenbasis": "mixed",
+          "temperaturspanne": {
+            "temperatur_min": 11.0,
+            "temperatur_max": 24.0,
+            "text": "Zwischen 11 und 24 °C"
+          },
+          "anzahl_regentage": 2,
+          "kritischster_tag": {
+            "tag": 1,
+            "datum": "2026-06-06",
+            "ort": "Dresden",
+            "grund": "Hoher erwarteter Niederschlag"
+          },
+          "gesamtbewertung": "Die Reise hat erhoehtes Wetterrisiko, besonders rund um Dresden. Die Reise enthaelt echte Vorhersagen und historische Schaetzungen.",
+          "wetter_risiko": "hoch",
+          "packempfehlung": "Packe Regenjacke, warme Schichten und wetterfeste Schuhe ein. Plane fuer Tag 1 eine flexible Alternative.",
+          "tagesuebersicht": [
+            {
+              "tag": 1,
+              "datum": "2026-06-06",
+              "ort": "Dresden",
+              "temperatur_min": 11.0,
+              "temperatur_max": 24.0,
+              "niederschlag_mm": 8.5,
+              "wetterbeschreibung": "Gewitter",
+              "datenbasis": "forecast"
+            },
+            {
+              "tag": 2,
+              "datum": "2026-06-07",
+              "ort": "Berlin",
+              "temperatur_min": 16.4,
+              "temperatur_max": 22.4,
+              "niederschlag_mm": 1.0,
+              "wetterbeschreibung": "Leichter Regen",
+              "datenbasis": "forecast"
+            },
+            {
+              "tag": 3,
+              "datum": "2026-06-08",
+              "ort": "Köln",
+              "temperatur_min": null,
+              "temperatur_max": null,
+              "niederschlag_mm": null,
+              "wetterbeschreibung": "Keine Wetterdaten verfuegbar",
+              "datenbasis": "unavailable"
+            }
+          ]
+        },
+        "fuel_summary": {
+          "name": "Gebrüder Neeb GmbH & Co. KG",
+          "price": 1.838,
+          "fuel_type": "E5",
+          "distance_km": 9.2,
+          "address": "Lochhamer Schlag, Gräfelfing"
+        },
+        "errors": []
+      },
+      "telemetry": {
+        "laufzeit_sekunden": 21.609,
+        "agent_aufrufe": 3,
+        "funktionsaufrufe": 0,
+        "input_bytes": 143,
+        "output_bytes": 4343,
+        "llm_prompt_tokens": 0,
+        "llm_completion_tokens": 0,
+        "llm_total_tokens": 0,
+        "token_hinweis": "Keine LLM-Aufrufe gefunden; Werte sind 0. Payload-Tokens sind geschaetzt.",
+        "geschaetzte_payload_tokens": 1114,
+        "agent_messungen": [
+          {
+            "agent": "maps_poi",
+            "laufzeit_sekunden": 0.15807979199999878,
+            "input_bytes": 96,
+            "output_bytes": 2752,
+            "status": "ok",
+            "fehler": null
+          },
+          {
+            "agent": "wetter",
+            "laufzeit_sekunden": 20.681020166,
+            "input_bytes": 378,
+            "output_bytes": 1218,
+            "status": "ok",
+            "fehler": null
+          },
+          {
+            "agent": "tankstelle",
+            "laufzeit_sekunden": 0.7668834579999952,
+            "input_bytes": 39,
+            "output_bytes": 139,
+            "status": "ok",
+            "fehler": null
+          }
+        ],
+        "fehler": []
+      }
+    }
+  }
+]

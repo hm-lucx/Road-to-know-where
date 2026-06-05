@@ -1,41 +1,358 @@
 #!/usr/bin/env python3
+"""Zentraler Orchestrator fuer Road-to-know-where.
 
-import sys
+Der Orchestrator nimmt Frontend-Daten entgegen, ruft die passenden Agents auf
+und baut daraus eine HTML-faehige Datenstruktur. Die Agent-Dateien bleiben
+bewusst eigenstaendig; diese Datei koordiniert nur die Uebergaben.
+"""
+
+import argparse
+import importlib.util
+import json
+import math
 import os
+import sys
+import time
+from dataclasses import dataclass, field
+from datetime import date, datetime, timedelta
+from pathlib import Path
+from types import ModuleType
+from typing import Any, Callable, Dict, List, Optional
 
-# Import des Tankstellen-Agenten
-# Beachte: Dateiname mit Leerzeichen muss so importiert werden
-spec = __import__('importlib.util').util.spec_from_file_location(
-    "tankstelle", 
-    os.path.join(os.path.dirname(__file__), "Tankstelle MR.py")
-)
-tankstelle = __import__('importlib.util').util.module_from_spec(spec)
-spec.loader.exec_module(tankstelle)
-cheapest_station = tankstelle.cheapest_station
 
-def orchestrate(city, fuel_type="e5"):
-    print(f"🚀 Starte Orchestration für {city}...\n")
-    
-    # Phase 1: Tankstelle
-    print("📍 Suche günstigste Tankstelle...")
-    gas_result = cheapest_station(city, fuel_type)
-    print(f"✅ Tankstelle gefunden: {gas_result}\n")
-    
-    # Phase 2: Wetter (SPÄTER hinzufügen)
-    # weather_result = get_weather(city)
-    
-    # Phase 3: Sehenswürdigkeiten (SPÄTER hinzufügen)
-    # sights_result = get_sights(city)
-    
-    # Ergebnis zusammenfassen
+PROJECT_DIR = Path(__file__).resolve().parent
+DEFAULT_FUEL_TYPE = "e5"
+
+
+def lade_agent_modul(dateiname: str, modulname: str) -> ModuleType:
+    """Laedt auch Agent-Dateien mit Leerzeichen oder Sonderzeichen im Namen."""
+    pfad = PROJECT_DIR / dateiname
+    spec = importlib.util.spec_from_file_location(modulname, pfad)
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Agent-Modul konnte nicht geladen werden: {pfad}")
+
+    modul = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(modul)
+    return modul
+
+
+tankstelle_agent = lade_agent_modul("Tankstelle MR.py", "tankstelle_agent")
+maps_poi_agent = lade_agent_modul("maps&poi.py", "maps_poi_agent")
+wetter_agent = lade_agent_modul("wetter_agent.py", "wetter_agent")
+
+
+def json_bytes(daten: Any) -> int:
+    """Misst die Groesse einer Datenstruktur als UTF-8-JSON."""
+    return len(json.dumps(daten, ensure_ascii=False, default=str).encode("utf-8"))
+
+
+def schaetze_tokens(daten: Any) -> int:
+    """Sehr grobe Token-Schaetzung: ca. 4 Zeichen pro Token."""
+    text = json.dumps(daten, ensure_ascii=False, default=str)
+    return math.ceil(len(text) / 4)
+
+
+@dataclass
+class AgentMessung:
+    """Telemetrie fuer einen einzelnen Agent-Aufruf."""
+
+    agent: str
+    laufzeit_sekunden: float
+    input_bytes: int
+    output_bytes: int
+    status: str
+    fehler: Optional[str] = None
+
+
+@dataclass
+class Telemetrie:
+    """Einfache interne Telemetrie fuer Uni-Auswertung und Debugging."""
+
+    startzeit: float = field(default_factory=time.perf_counter)
+    agent_aufrufe: int = 0
+    funktionsaufrufe: int = 0
+    agent_messungen: List[AgentMessung] = field(default_factory=list)
+    fehler: List[Dict[str, str]] = field(default_factory=list)
+
+    def agent_starten(
+        self,
+        agent_name: str,
+        funktion: Callable[..., Any],
+        payload: Dict[str, Any],
+        *args: Any,
+        **kwargs: Any,
+    ) -> Any:
+        """Ruft einen Agent auf, misst Laufzeit und sammelt Fehler zentral."""
+        self.agent_aufrufe += 1
+        start = time.perf_counter()
+
+        try:
+            ergebnis = funktion(*args, **kwargs)
+            self.agent_messungen.append(
+                AgentMessung(
+                    agent=agent_name,
+                    laufzeit_sekunden=time.perf_counter() - start,
+                    input_bytes=json_bytes(payload),
+                    output_bytes=json_bytes(ergebnis),
+                    status="ok",
+                )
+            )
+            return ergebnis
+        except Exception as fehler:  # Agenten duerfen den ganzen Plan nicht sprengen.
+            meldung = str(fehler)
+            self.fehler.append({"agent": agent_name, "meldung": meldung})
+            self.agent_messungen.append(
+                AgentMessung(
+                    agent=agent_name,
+                    laufzeit_sekunden=time.perf_counter() - start,
+                    input_bytes=json_bytes(payload),
+                    output_bytes=0,
+                    status="error",
+                    fehler=meldung,
+                )
+            )
+            return None
+
+    def zusammenfassung(self, eingabe: Any, ausgabe: Any) -> Dict[str, Any]:
+        """Erstellt eine kompakte, frontend- und report-taugliche Auswertung."""
+        geschaetzte_payload_tokens = schaetze_tokens(eingabe) + schaetze_tokens(ausgabe)
+        return {
+            "laufzeit_sekunden": round(time.perf_counter() - self.startzeit, 4),
+            "agent_aufrufe": self.agent_aufrufe,
+            "funktionsaufrufe": self.funktionsaufrufe,
+            "input_bytes": json_bytes(eingabe),
+            "output_bytes": json_bytes(ausgabe),
+            "llm_prompt_tokens": 0,
+            "llm_completion_tokens": 0,
+            "llm_total_tokens": 0,
+            "token_hinweis": "Keine LLM-Aufrufe gefunden; Werte sind 0. Payload-Tokens sind geschaetzt.",
+            "geschaetzte_payload_tokens": geschaetzte_payload_tokens,
+            "agent_messungen": [messung.__dict__ for messung in self.agent_messungen],
+            "fehler": self.fehler,
+        }
+
+
+def normalisiere_frontend_input(frontend_input: Dict[str, Any]) -> Dict[str, Any]:
+    """Setzt Defaults und haelt nur die Werte, die der Orchestrator braucht."""
+    start_location = str(frontend_input.get("start_location") or frontend_input.get("city") or "Berlin").strip()
+    theme = str(frontend_input.get("theme") or "Städte").strip()
+    duration_days = max(1, int(frontend_input.get("duration_days", 3)))
+    travel_time_per_day = max(1, int(frontend_input.get("travel_time_per_day", 6)))
+    fuel_type = str(frontend_input.get("fuel_type") or DEFAULT_FUEL_TYPE).strip().lower()
+    start_date = str(frontend_input.get("start_date") or date.today().isoformat())
+
     return {
-        "city": city,
-        "gas_station": gas_result,
-        # "weather": weather_result,
-        # "sights": sights_result,
+        "start_location": start_location,
+        "theme": theme,
+        "duration_days": duration_days,
+        "travel_time_per_day": travel_time_per_day,
+        "fuel_type": fuel_type,
+        "start_date": start_date,
     }
 
+
+def payload_fuer_route(reise_input: Dict[str, Any]) -> Dict[str, Any]:
+    """Gibt dem Maps/POI-Agent nur die Routenparameter, nicht den ganzen Input."""
+    return {
+        "start_location": reise_input["start_location"],
+        "theme": reise_input["theme"],
+        "duration_days": reise_input["duration_days"],
+        "travel_time_per_day": reise_input["travel_time_per_day"],
+    }
+
+
+def baue_wetter_etappen(plan: Dict[str, Any], startdatum_text: str, dauer_tage: int) -> List[Dict[str, Any]]:
+    """Wandelt Route-Stops in die schlanke Wetter-Agent-Schnittstelle um."""
+    route_stops = plan.get("route_stops") or []
+    if len(route_stops) < 2:
+        return []
+
+    startdatum = datetime.strptime(startdatum_text, "%Y-%m-%d").date()
+    etappen = []
+    ziel_stops = route_stops[1 : dauer_tage + 1]
+
+    for index, ziel in enumerate(ziel_stops, start=1):
+        start = route_stops[index - 1]
+        etappen.append(
+            {
+                "tag": index,
+                "datum": (startdatum + timedelta(days=index - 1)).isoformat(),
+                "startort": start["name"],
+                "zielort": ziel["name"],
+                "ziel_lat": ziel["lat"],
+                "ziel_lon": ziel["lng"],
+            }
+        )
+
+    return etappen
+
+
+def baue_frontend_output(
+    reise_input: Dict[str, Any],
+    route_plan: Optional[Dict[str, Any]],
+    wetter_kachel: Optional[Dict[str, Any]],
+    tankstelle: Optional[Dict[str, Any]],
+    telemetrie: Telemetrie,
+) -> Dict[str, Any]:
+    """Fuehrt Agent-Ergebnisse zu einer stabilen Ausgabe fuer das Frontend zusammen."""
+    route_plan = route_plan or {}
+    frontend_plan = {
+        **route_plan,
+        "weather": wetter_kachel,
+        "fuel_summary": tankstelle,
+        "errors": telemetrie.fehler,
+    }
+
+    return {
+        "status": "ok" if not telemetrie.fehler else "partial",
+        "input": reise_input,
+        "frontend_plan": frontend_plan,
+    }
+
+
+def orchestrate_trip(frontend_input: Dict[str, Any], include_telemetry: bool = False) -> Dict[str, Any]:
+    """Hauptfunktion fuer das Frontend: komplette Roadtrip-Planung koordinieren."""
+    telemetrie = Telemetrie()
+    reise_input = normalisiere_frontend_input(frontend_input)
+
+    route_payload = payload_fuer_route(reise_input)
+    route_plan = telemetrie.agent_starten(
+        "maps_poi",
+        maps_poi_agent.plan_trip,
+        route_payload,
+        route_payload,
+    )
+
+    wetter_kachel = None
+    if route_plan:
+        wetter_etappen = baue_wetter_etappen(
+            route_plan,
+            reise_input["start_date"],
+            reise_input["duration_days"],
+        )
+        if wetter_etappen:
+            wetter_kachel = telemetrie.agent_starten(
+                "wetter",
+                wetter_agent.erstelle_wetter_kachel,
+                {"reise_etappen": wetter_etappen},
+                wetter_etappen,
+            )
+
+    tank_payload = {
+        "city": reise_input["start_location"],
+        "fuel_type": reise_input["fuel_type"],
+    }
+    tankstelle = telemetrie.agent_starten(
+        "tankstelle",
+        tankstelle_agent.cheapest_station,
+        tank_payload,
+        reise_input["start_location"],
+        reise_input["fuel_type"],
+    )
+
+    ausgabe = baue_frontend_output(
+        reise_input=reise_input,
+        route_plan=route_plan,
+        wetter_kachel=wetter_kachel,
+        tankstelle=tankstelle,
+        telemetrie=telemetrie,
+    )
+
+    if include_telemetry:
+        ausgabe["telemetry"] = telemetrie.zusammenfassung(reise_input, ausgabe)
+
+    return ausgabe
+
+
+def orchestrate(city: str, fuel_type: str = DEFAULT_FUEL_TYPE, include_telemetry: bool = False) -> Dict[str, Any]:
+    """Rueckwaertskompatibler Mini-Orchestrator fuer die alte Konsolen-Nutzung."""
+    telemetrie = Telemetrie()
+    eingabe = {"city": city, "fuel_type": fuel_type}
+    tankstelle = telemetrie.agent_starten(
+        "tankstelle",
+        tankstelle_agent.cheapest_station,
+        eingabe,
+        city,
+        fuel_type,
+    )
+    ausgabe = {
+        "city": city,
+        "gas_station": tankstelle,
+        "errors": telemetrie.fehler,
+    }
+
+    if include_telemetry:
+        ausgabe["telemetry"] = telemetrie.zusammenfassung(eingabe, ausgabe)
+
+    return ausgabe
+
+
+def beispiel_testdatensatz() -> Dict[str, Any]:
+    """Kleiner 3-Tage-Datensatz fuer reproduzierbare Orchestrator-Tests."""
+    return {
+        "start_location": "München",
+        "theme": "Städte",
+        "duration_days": 3,
+        "travel_time_per_day": 6,
+        "fuel_type": "e5",
+        "start_date": "2026-06-06",
+    }
+
+
+def zaehle_projekt_funktionsaufrufe(funktion: Callable[[], Dict[str, Any]]) -> Dict[str, Any]:
+    """Zaehlt Funktionsaufrufe aus Projektdateien per Python-Profiler."""
+    zaehler = {"calls": 0}
+    projekt_pfad = str(PROJECT_DIR)
+
+    def profiler(frame: Any, event: str, arg: Any) -> Any:
+        if event == "call" and os.path.abspath(frame.f_code.co_filename).startswith(projekt_pfad):
+            zaehler["calls"] += 1
+        return profiler
+
+    vorheriger_profiler = sys.getprofile()
+    sys.setprofile(profiler)
+    try:
+        ergebnis = funktion()
+    finally:
+        sys.setprofile(vorheriger_profiler)
+
+    if "telemetry" in ergebnis:
+        ergebnis["telemetry"]["funktionsaufrufe"] = zaehler["calls"]
+    return ergebnis
+
+
+def testlauf_roadtrip() -> Dict[str, Any]:
+    """Fuehrt den 3-Tage-Beispieltest inklusive Telemetrie aus."""
+    return zaehle_projekt_funktionsaufrufe(
+        lambda: orchestrate_trip(beispiel_testdatensatz(), include_telemetry=True)
+    )
+
+
+def testlauf_legacy(city: str = "München", fuel_type: str = DEFAULT_FUEL_TYPE) -> Dict[str, Any]:
+    """Fuehrt denselben Mini-Test wie der alte Orchestrator aus."""
+    return zaehle_projekt_funktionsaufrufe(
+        lambda: orchestrate(city, fuel_type=fuel_type, include_telemetry=True)
+    )
+
+
+def drucke_json(daten: Dict[str, Any]) -> None:
+    print(json.dumps(daten, ensure_ascii=False, indent=2, default=str))
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Road-to-know-where Orchestrator")
+    parser.add_argument("--test", action="store_true", help="3-Tage-Testdatensatz mit Telemetrie ausfuehren")
+    parser.add_argument("--city", help="Alten Mini-Orchestrator fuer eine Stadt ausfuehren")
+    parser.add_argument("--fuel-type", default=DEFAULT_FUEL_TYPE, help="Kraftstoffart: e5, e10 oder diesel")
+    args = parser.parse_args()
+
+    if args.test:
+        drucke_json(testlauf_roadtrip())
+        return
+
+    city = args.city or input("Welche Stadt? ").strip()
+    drucke_json(testlauf_legacy(city, args.fuel_type))
+
+
 if __name__ == "__main__":
-    city = input("Welche Stadt? ")
-    result = orchestrate(city)
-    print(result)
+    main()
