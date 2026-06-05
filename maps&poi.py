@@ -51,11 +51,36 @@ THEME_DESTINATIONS = {
         ]},
     ],
     "besondere bauten": [
+        {"name": "Freiburg", "lat": 47.9990, "lng": 7.8421, "poi": [
+            {"name": "Freiburger Münster", "description": "Gotische Kathedrale und Wahrzeichen der Altstadt."},
+            {"name": "Historisches Kaufhaus", "description": "Auffälliges Renaissancegebäude am Münsterplatz."}
+        ]},
+        {"name": "Schloss Karlsruhe", "lat": 49.0137, "lng": 8.4044, "poi": [
+            {"name": "Schloss Karlsruhe", "description": "Barocke Schlossanlage mit fächerförmigem Stadtgrundriss."},
+            {"name": "Badisches Landesmuseum", "description": "Museum im Schloss mit Kultur- und Architekturbezug."}
+        ]},
         {"name": "Neuschwanstein", "lat": 47.5576, "lng": 10.7498, "poi": [
             {"name": "Schloss Neuschwanstein", "description": "Märchenschloss von König Ludwig II."}
         ]},
         {"name": "Heidelberg", "lat": 49.3988, "lng": 8.6724, "poi": [
-            {"name": "Heidelberger Schloss", "description": "Ruine mit Blick über die Stadt."}
+            {"name": "Heidelberger Schloss", "description": "Renaissance-Schlossruine mit Blick über die Stadt."},
+            {"name": "Alte Brücke", "description": "Historische Steinbrücke über den Neckar."}
+        ]},
+        {"name": "Schloss Schwetzingen", "lat": 49.3835, "lng": 8.5705, "poi": [
+            {"name": "Schloss Schwetzingen", "description": "Barockschloss mit berühmtem Schlossgarten."},
+            {"name": "Schlosstheater", "description": "Historisches Rokokotheater im Schlosskomplex."}
+        ]},
+        {"name": "Schloss Ludwigsburg", "lat": 48.8975, "lng": 9.1969, "poi": [
+            {"name": "Residenzschloss Ludwigsburg", "description": "Eine der größten barocken Schlossanlagen Deutschlands."},
+            {"name": "Blühendes Barock", "description": "Schlossgarten mit historischen Gartenanlagen."}
+        ]},
+        {"name": "Ulm", "lat": 48.4011, "lng": 9.9876, "poi": [
+            {"name": "Ulmer Münster", "description": "Kirche mit dem höchsten Kirchturm der Welt."},
+            {"name": "Fischerviertel", "description": "Historisches Viertel mit Fachwerk und Kanälen."}
+        ]},
+        {"name": "Würzburg", "lat": 49.7913, "lng": 9.9534, "poi": [
+            {"name": "Würzburger Residenz", "description": "UNESCO-Welterbe und bedeutendes Barockschloss."},
+            {"name": "Festung Marienberg", "description": "Historische Festungsanlage über dem Main."}
         ]},
         {"name": "Kölner Dom", "lat": 50.9413, "lng": 6.9583, "poi": [
             {"name": "Kölner Dom", "description": "Beeindruckende gotische Kathedrale."}
@@ -89,6 +114,10 @@ KNOWN_START_LOCATIONS = {
     "frankfurt": {"lat": 50.1109, "lng": 8.6821},
     "stuttgart": {"lat": 48.7758, "lng": 9.1829},
     "dresden": {"lat": 51.0504, "lng": 13.7373},
+    "freiburg": {"lat": 47.9990, "lng": 7.8421},
+    "freiburg im breisgau": {"lat": 47.9990, "lng": 7.8421},
+    "waltershofen": {"lat": 48.0228, "lng": 7.7181},
+    "waltershofen freiburg": {"lat": 48.0228, "lng": 7.7181},
 }
 
 HTML_TEMPLATE = """<!DOCTYPE html>
@@ -314,12 +343,51 @@ def get_start_coordinates(start_location: str) -> Dict[str, float]:
     lookup = start_location.strip().lower()
     if lookup in KNOWN_START_LOCATIONS:
         return KNOWN_START_LOCATIONS[lookup]
-    # Fallback: nimm Berlin, wenn kein bekannter Startort gefunden wird.
-    return KNOWN_START_LOCATIONS["berlin"]
+    # Fallback: Freiburg ist fuer unbekannte Orte im Uni-Test sinnvoller als Berlin,
+    # weil Waltershofen im Freiburger Raum liegt und sonst sehr unplausible Routen entstehen.
+    return KNOWN_START_LOCATIONS["freiburg"]
 
 
 def distance(a: Dict[str, float], b: Dict[str, float]) -> float:
     return math.hypot(a["lat"] - b["lat"], a["lng"] - b["lng"])
+
+
+def haversine_km(a: Dict[str, float], b: Dict[str, float]) -> float:
+    """Berechnet eine Luftlinien-Distanz in Kilometern."""
+    radius = 6371.0
+    lat1 = math.radians(float(a["lat"]))
+    lat2 = math.radians(float(b["lat"]))
+    delta_lat = math.radians(float(b["lat"]) - float(a["lat"]))
+    delta_lng = math.radians(float(b["lng"]) - float(a["lng"]))
+    wert = (
+        math.sin(delta_lat / 2) ** 2
+        + math.cos(lat1) * math.cos(lat2) * math.sin(delta_lng / 2) ** 2
+    )
+    return radius * 2 * math.atan2(math.sqrt(wert), math.sqrt(1 - wert))
+
+
+def schaetze_auto_distanz_km(a: Dict[str, float], b: Dict[str, float]) -> float:
+    """Schaetzt Straßendistanz aus Luftlinie. OSRM prueft spaeter die echte Route."""
+    return haversine_km(a, b) * 1.28
+
+
+def schaetze_fahrzeit_stunden(a: Dict[str, float], b: Dict[str, float]) -> float:
+    """Schaetzt Fahrzeit konservativ mit 75 km/h Durchschnitt."""
+    return schaetze_auto_distanz_km(a, b) / 75
+
+
+def erstelle_etappeninfo(start: Dict[str, Any], ziel: Dict[str, Any], max_stunden: int) -> Dict[str, Any]:
+    """Erstellt eine Plausibilitaetspruefung fuer eine Tagesetappe."""
+    distanz = round(schaetze_auto_distanz_km(start, ziel), 1)
+    fahrzeit = round(schaetze_fahrzeit_stunden(start, ziel), 1)
+    return {
+        "start": start["name"],
+        "ziel": ziel["name"],
+        "distanz_km_geschaetzt": distanz,
+        "fahrzeit_stunden_geschaetzt": fahrzeit,
+        "max_stunden": max_stunden,
+        "innerhalb_limit": fahrzeit <= max_stunden + 0.15,
+    }
 
 
 def point_to_segment_distance(point: Dict[str, float], a: Dict[str, float], b: Dict[str, float]) -> float:
@@ -406,54 +474,115 @@ def select_route_stops(start_location: str, theme: str, duration_days: int, trav
     theme_key = normalize_theme(theme)
     candidates = [dest for dest in THEME_DESTINATIONS[theme_key] if dest["name"].strip().lower() != start_location.strip().lower()]
     start_coords = get_start_coordinates(start_location)
-
-    max_stops = min(len(candidates), max(2, duration_days + 1))
-    if travel_time_per_day <= 4:
-        max_stops = min(max_stops, 3)
-    elif travel_time_per_day <= 6:
-        max_stops = min(max_stops, 4)
-    else:
-        max_stops = min(max_stops, 5)
-
-    def scenic_score(dest: Dict[str, Any]) -> float:
-        return len(dest.get("poi", [])) * 20 - distance(dest, start_coords) * 8
-
-    selected = sorted(candidates, key=scenic_score, reverse=True)[: max_stops - 1]
-
     route = [{"name": start_location, **start_coords}]
     current = route[0]
-    remaining = selected.copy()
-    while remaining:
-        next_stop = min(remaining, key=lambda dest: distance(dest, current) - len(dest.get("poi", [])) * 0.4)
+    remaining = candidates.copy()
+    max_stop_count = min(len(remaining), max(1, duration_days))
+
+    while remaining and len(route) <= max_stop_count:
+        erreichbare_ziele = [
+            ziel
+            for ziel in remaining
+            if schaetze_fahrzeit_stunden(current, ziel) <= travel_time_per_day + 0.15
+        ]
+
+        if not erreichbare_ziele:
+            break
+
+        if travel_time_per_day >= 5 and len(route) > 1:
+            nicht_zu_nah = [
+                ziel
+                for ziel in erreichbare_ziele
+                if all(haversine_km(ziel, stop) >= 25 for stop in route[1:])
+            ]
+            if nicht_zu_nah:
+                erreichbare_ziele = nicht_zu_nah
+
+        def plausibilitaets_score(ziel: Dict[str, Any]) -> float:
+            # Bei kurzen Reisetagen waehlen wir das naechste passende Ziel.
+            # Bei laengeren Reisetagen darf der Radius spaeter groesser werden,
+            # ohne direkt am Anfang unlogische Spruenge zu erzeugen.
+            fahrzeit = schaetze_fahrzeit_stunden(current, ziel)
+            poi_bonus = len(ziel.get("poi", [])) * 0.12
+            score = fahrzeit - poi_bonus
+
+            if travel_time_per_day >= 5:
+                aktueller_radius = haversine_km(route[0], current)
+                ziel_radius = haversine_km(route[0], ziel)
+                rueckschritt_km = max(0.0, aktueller_radius - ziel_radius)
+                score += rueckschritt_km / 80
+
+                if len(route) >= max(2, max_stop_count - 1):
+                    score -= min(ziel_radius, travel_time_per_day * 75) / 180
+
+            return score
+
+        gewaehlter_stop = min(erreichbare_ziele, key=plausibilitaets_score)
+        next_stop = {
+            **gewaehlter_stop,
+            "leg_from_previous": erstelle_etappeninfo(current, gewaehlter_stop, travel_time_per_day),
+        }
         route.append(next_stop)
-        remaining.remove(next_stop)
+        remaining.remove(gewaehlter_stop)
         current = next_stop
 
     return route
 
 
-def build_daily_plan(route: List[Dict[str, Any]], travel_time_per_day: int, duration_days: int) -> List[Dict[str, str]]:
+def build_daily_plan(route: List[Dict[str, Any]], travel_time_per_day: int, duration_days: int) -> List[Dict[str, Any]]:
     plan = []
     stops = route[1:]
-    days = max(1, min(duration_days, len(stops)))
-    stops_per_day = max(1, math.ceil(len(stops) / days))
-
     day = 1
-    index = 0
-    while index < len(stops):
-        current_stops = stops[index:index + stops_per_day]
-        route_names = ' → '.join([stop['name'] for stop in current_stops])
+
+    for stop in stops[:duration_days]:
+        leg = stop.get("leg_from_previous") or {}
+        poi_names = [poi["name"] for poi in stop.get("poi", [])]
+        poi_text = ", ".join(poi_names[:2]) if poi_names else "lokale Highlights"
+        fahrzeit = leg.get("fahrzeit_stunden_geschaetzt")
+        distanz = leg.get("distanz_km_geschaetzt")
         plan.append({
             "day": f"Tag {day}",
-            "activities": f"Etappe: {route_names}. Plane genug Zeit für Sehenswürdigkeiten und Pausen; ca. {travel_time_per_day} Stunden Tagesreisezeit."
+            "type": "drive",
+            "start": leg.get("start"),
+            "destination": stop["name"],
+            "distance_km_estimated": distanz,
+            "drive_time_hours_estimated": fahrzeit,
+            "max_travel_time_hours": travel_time_per_day,
+            "within_travel_limit": leg.get("innerhalb_limit", True),
+            "activities": (
+                f"Etappe nach {stop['name']} ({fahrzeit} h, ca. {distanz} km geschätzt). "
+                f"Besichtigung: {poi_text}."
+            ),
+            "hint": "Fahrzeitgrenze eingehalten." if leg.get("innerhalb_limit", True) else "Etappe überschreitet die Fahrzeitgrenze.",
         })
-        index += stops_per_day
         day += 1
 
     while day <= duration_days:
+        basis_stop = stops[(day - len(stops) - 1) % len(stops)] if stops else route[0]
+        poi_names = [poi["name"] for poi in basis_stop.get("poi", [])]
+        if poi_names:
+            activity = (
+                f"Vertiefungstag in {basis_stop['name']}: Nimm dir bewusst Zeit für "
+                f"{', '.join(poi_names[:2])}. Keine lange Fahretappe geplant."
+            )
+            tag_typ = "local_activity"
+        else:
+            activity = (
+                f"Bewusster Entspannungstag in {basis_stop['name']}: kurze Spaziergänge, "
+                "lokale Gastronomie und flexible Pausen statt langer Fahrt."
+            )
+            tag_typ = "rest"
+
         plan.append({
             "day": f"Tag {day}",
-            "activities": "Ruhetag oder ausführliche Besichtigung vor Ort. Genieße die Umgebung und versuche lokale Highlights." 
+            "type": tag_typ,
+            "destination": basis_stop["name"],
+            "distance_km_estimated": 0,
+            "drive_time_hours_estimated": 0,
+            "max_travel_time_hours": travel_time_per_day,
+            "within_travel_limit": True,
+            "activities": activity,
+            "hint": "Kein sinnloser Transfer: Der Tag nutzt vorhandene POIs oder Erholung vor Ort.",
         })
         day += 1
 
@@ -462,9 +591,14 @@ def build_daily_plan(route: List[Dict[str, Any]], travel_time_per_day: int, dura
 
 def collect_pois(route: List[Dict[str, Any]], theme: str) -> List[Dict[str, Any]]:
     pois = []
+    bekannte_pois = set()
     route_names = {stop['name'].strip().lower() for stop in route}
     for stop in route[1:]:
         for poi in stop.get("poi", []):
+            poi_key = (poi["name"].strip().lower(), stop["name"].strip().lower())
+            if poi_key in bekannte_pois:
+                continue
+            bekannte_pois.add(poi_key)
             pois.append({
                 "name": poi["name"],
                 "description": poi["description"],
@@ -481,6 +615,10 @@ def collect_pois(route: List[Dict[str, Any]], theme: str) -> List[Dict[str, Any]
         for i in range(len(route) - 1):
             if point_to_segment_distance(candidate, route[i], route[i + 1]) <= threshold:
                 for poi in candidate.get("poi", []):
+                    poi_key = (poi["name"].strip().lower(), candidate["name"].strip().lower())
+                    if poi_key in bekannte_pois:
+                        continue
+                    bekannte_pois.add(poi_key)
                     pois.append({
                         "name": poi["name"],
                         "description": f"(Nahe der Route) {poi['description']}",
@@ -491,6 +629,29 @@ def collect_pois(route: List[Dict[str, Any]], theme: str) -> List[Dict[str, Any]
                 break
 
     return pois
+
+
+def erstelle_plan_hinweise(route_stops: List[Dict[str, Any]], daily_plan: List[Dict[str, Any]], duration_days: int, travel_time_per_day: int) -> List[str]:
+    """Erstellt nutzerfreundliche Hinweise zu Anpassungen und Schaetzungen."""
+    hinweise = [
+        "Fahrzeiten und Distanzen in den Tageskarten sind Plausibilitaets-Schaetzungen.",
+    ]
+
+    if len(route_stops) - 1 < duration_days:
+        hinweise.append(
+            "Die Route wurde an die Tagesreisezeit angepasst: Statt zu weiter Spruenge wurden lokale Aktivitaets- oder Erholungstage eingeplant."
+        )
+
+    if all(tag.get("within_travel_limit", True) for tag in daily_plan):
+        hinweise.append(
+            f"Alle geplanten Fahretappen bleiben innerhalb der Grenze von ca. {travel_time_per_day} Stunden pro Tag."
+        )
+    else:
+        hinweise.append(
+            "Mindestens eine Etappe wurde als kritisch markiert, weil sie die Tagesreisezeit ueberschreitet."
+        )
+
+    return hinweise
 
 
 def plan_trip(data: Dict[str, Any]) -> Dict[str, Any]:
@@ -505,6 +666,7 @@ def plan_trip(data: Dict[str, Any]) -> Dict[str, Any]:
     route_geometry = get_osrm_route_geometry(route_stops)
     daily_plan = build_daily_plan(route_stops, travel_time_per_day, duration_days)
     pois = collect_pois(route_stops, theme)
+    planning_notes = erstelle_plan_hinweise(route_stops, daily_plan, duration_days, travel_time_per_day)
     tanken_data = load_tanken_data() or []
     fuel_stations = select_cheapest_tankstellen(route_stops, tanken_data)
 
@@ -518,6 +680,7 @@ def plan_trip(data: Dict[str, Any]) -> Dict[str, Any]:
         "daily_plan": daily_plan,
         "pois": pois,
         "fuel_stations": fuel_stations,
+        "planning_notes": planning_notes,
         "weather_data": weather_data,
         "gas_station": gas_station,
     }

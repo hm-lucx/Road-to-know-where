@@ -113,8 +113,9 @@ def hole_osrm_route(route_stops: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 def normalisiere_payload(daten: Dict[str, Any]) -> Dict[str, Any]:
     """Wandelt Frontend-Werte in das Orchestrator-Format um."""
-    interests = daten.get("interests") or ["Städte"]
+    interests = daten.get("interests")
     theme = interests[0] if isinstance(interests, list) and interests else "Städte"
+    theme = str(daten.get("theme") or theme).strip()
 
     return {
         "start_location": str(daten.get("start_location") or "München").strip(),
@@ -149,7 +150,17 @@ def ergaenze_frontend_daten(result: Dict[str, Any], eingabe: Dict[str, Any]) -> 
         "fuel_liters": liters,
         "fuel_price": fuel_price,
         "fuel_cost": cost,
+        "estimated": True,
     }
+    plan.setdefault("planning_notes", [])
+    if route["source"] == "fallback":
+        plan["planning_notes"].append(
+            "Die Autoroute konnte nicht exakt berechnet werden; Distanz und Kosten sind daher grobe Schaetzungen."
+        )
+    else:
+        plan["planning_notes"].append(
+            "Die Kartenlinie basiert auf einer OSRM-Autoroute; Kosten bleiben eine Verbrauchs-Schaetzung."
+        )
     result["frontend_plan"] = plan
     return result
 
@@ -169,7 +180,11 @@ def plan_route():
         result = ergaenze_frontend_daten(result, payload)
         return jsonify({"ok": True, "input": payload, "result": result})
     except Exception as fehler:
-        return jsonify({"ok": False, "error": str(fehler)}), 500
+        return jsonify({
+            "ok": False,
+            "error": "Die Reise konnte gerade nicht geplant werden. Bitte pruefe die Eingaben und versuche es erneut.",
+            "technical_error": str(fehler),
+        }), 500
 
 
 if __name__ == "__main__":

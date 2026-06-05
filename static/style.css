@@ -385,6 +385,30 @@ select {
   line-height: 1.5;
 }
 
+.day-item small {
+  display: block;
+  margin-top: 8px;
+  color: var(--teal);
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.notice-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.notice {
+  margin: 0;
+  border: 1px solid #f0d99a;
+  background: #fff8e6;
+  color: #7a5414;
+  border-radius: 8px;
+  padding: 10px 12px;
+  line-height: 1.45;
+}
+
 .poi-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -71,12 +71,24 @@ function renderResult(result, input) {
   const cityNames = routeStops.map((stop) => stop.name).join(' → ');
   document.getElementById('resultTitle').textContent = `${input.duration_days} Tage ab ${input.start_location}`;
   document.getElementById('resultSummary').textContent = cityNames || 'Route wurde geplant.';
+  renderPlanningNotes(plan.planning_notes || []);
   renderMetrics(plan, result.telemetry || {});
   renderMap(plan);
   renderDailyPlan(plan.daily_plan || []);
   renderWeather(plan.weather || {});
   renderFuel(plan.fuel_summary || {}, plan.cost_estimate || {}, plan);
   renderPois(plan.pois || []);
+}
+
+function renderPlanningNotes(notes) {
+  const target = document.getElementById('planningNotes');
+  if (!notes.length) {
+    target.innerHTML = '';
+    return;
+  }
+  target.innerHTML = notes
+    .map((note) => `<p class="notice">${escapeHtml(note)}</p>`)
+    .join('');
 }
 
 function renderMetrics(plan, telemetry) {
@@ -152,8 +164,18 @@ function renderDailyPlan(days) {
     <div class="day-item">
       <strong>${escapeHtml(day.day)}</strong>
       <p>${escapeHtml(day.activities)}</p>
+      <small>${escapeHtml(formatDayMeta(day))}</small>
     </div>
   `).join('');
+}
+
+function formatDayMeta(day) {
+  const typeLabel = day.type === 'drive' ? 'Fahrtetappe' : day.type === 'local_activity' ? 'Aktivität vor Ort' : 'Ruhetag';
+  const driveTime = day.drive_time_hours_estimated ?? 0;
+  const distance = day.distance_km_estimated ?? 0;
+  const limit = day.max_travel_time_hours ?? 'n/a';
+  const status = day.within_travel_limit ? 'innerhalb der Grenze' : 'kritisch';
+  return `${typeLabel}: ca. ${driveTime} h, ${distance} km, Limit ${limit} h, ${status}. ${day.hint || ''}`;
 }
 
 function renderWeather(weather) {
@@ -167,9 +189,14 @@ function renderWeather(weather) {
     ['Kritischer Tag', critical.ort ? `${critical.ort}: ${critical.grund}` : 'n/a'],
     ['Packempfehlung', weather.packempfehlung || 'n/a'],
   ];
+  const basisHint = weather.datenbasis === 'historical_estimate'
+    ? '<p class="notice">Wetterdaten sind historische Schätzwerte, weil der Zeitraum außerhalb der Forecast-Spanne liegt.</p>'
+    : weather.datenbasis === 'forecast'
+      ? '<p class="notice">Wetterdaten stammen aus einer aktuellen Forecast-Abfrage.</p>'
+      : '<p class="notice">Wetterdaten sind ein Fallback und sollten später erneut geprüft werden.</p>';
   document.getElementById('weatherCard').innerHTML = lines
     .map(([label, value]) => `<p class="weather-line"><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</p>`)
-    .join('');
+    .join('') + basisHint;
 }
 
 function renderFuel(fuel, cost, plan) {

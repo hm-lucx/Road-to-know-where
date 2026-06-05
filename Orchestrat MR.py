@@ -164,27 +164,96 @@ def payload_fuer_route(reise_input: Dict[str, Any]) -> Dict[str, Any]:
 def baue_wetter_etappen(plan: Dict[str, Any], startdatum_text: str, dauer_tage: int) -> List[Dict[str, Any]]:
     """Wandelt Route-Stops in die schlanke Wetter-Agent-Schnittstelle um."""
     route_stops = plan.get("route_stops") or []
-    if len(route_stops) < 2:
+    daily_plan = plan.get("daily_plan") or []
+    if len(route_stops) < 1:
         return []
 
     startdatum = datetime.strptime(startdatum_text, "%Y-%m-%d").date()
     etappen = []
-    ziel_stops = route_stops[1 : dauer_tage + 1]
+    stop_lookup = {stop["name"]: stop for stop in route_stops}
+    letzter_stop = route_stops[0]
 
-    for index, ziel in enumerate(ziel_stops, start=1):
-        start = route_stops[index - 1]
+    for index in range(1, dauer_tage + 1):
+        tag_plan = daily_plan[index - 1] if index - 1 < len(daily_plan) else {}
+        zielname = tag_plan.get("destination")
+        ziel = stop_lookup.get(zielname) if zielname else None
+
+        if ziel is None and index < len(route_stops):
+            ziel = route_stops[index]
+        if ziel is None:
+            ziel = letzter_stop
+
         etappen.append(
             {
                 "tag": index,
                 "datum": (startdatum + timedelta(days=index - 1)).isoformat(),
-                "startort": start["name"],
+                "startort": letzter_stop["name"],
                 "zielort": ziel["name"],
                 "ziel_lat": ziel["lat"],
                 "ziel_lon": ziel["lng"],
             }
         )
+        letzter_stop = ziel
 
     return etappen
+
+
+def erstelle_fallback_wetter_kachel(reise_input: Dict[str, Any], route_plan: Optional[Dict[str, Any]], meldung: str) -> Dict[str, Any]:
+    """Erstellt eine vollstaendige Wetter-Kachel, wenn der Wetter-Agent ausfaellt."""
+    route_stops = (route_plan or {}).get("route_stops") or [{"name": reise_input["start_location"]}]
+    ort = route_stops[-1].get("name", reise_input["start_location"])
+    return {
+        "titel": "Wetterprognose fuer deine Reise",
+        "datenbasis": "fallback_estimate",
+        "temperaturspanne": {
+            "temperatur_min": None,
+            "temperatur_max": None,
+            "text": "Keine belastbaren Temperaturwerte verfuegbar",
+        },
+        "anzahl_regentage": 0,
+        "kritischster_tag": {
+            "tag": None,
+            "datum": None,
+            "ort": ort,
+            "grund": "Wetterdaten konnten nur als Fallback bewertet werden",
+        },
+        "gesamtbewertung": f"Wetterdaten wurden als Fallback ausgegeben: {meldung}",
+        "wetter_risiko": "mittel",
+        "packempfehlung": "Plane wetterflexibel: Regenjacke, warme Schicht und bequeme Schuhe einpacken.",
+        "tagesuebersicht": [],
+    }
+
+
+def normalisiere_wetter_kachel(wetter_kachel: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """Sichert Pflichtfelder und einfache Aliasnamen fuer Frontend und Tests ab."""
+    daten = dict(wetter_kachel or {})
+    temperaturspanne = daten.get("temperaturspanne") or {
+        "temperatur_min": None,
+        "temperatur_max": None,
+        "text": "Keine belastbaren Temperaturwerte verfuegbar",
+    }
+    anzahl_regentage = daten.get("anzahl_regentage", daten.get("regentage", 0))
+    wetter_risiko = daten.get("wetter_risiko", daten.get("risiko", "mittel"))
+    kritischster_tag = daten.get("kritischster_tag") or {
+        "tag": None,
+        "datum": None,
+        "ort": "Route",
+        "grund": "Keine kritischen Wetterdaten erkannt",
+    }
+
+    daten["titel"] = daten.get("titel") or "Wetterprognose fuer deine Reise"
+    daten["datenbasis"] = daten.get("datenbasis") or "fallback_estimate"
+    daten["temperaturspanne"] = temperaturspanne
+    daten["anzahl_regentage"] = anzahl_regentage
+    daten["regentage"] = anzahl_regentage
+    daten["kritischster_tag"] = kritischster_tag
+    daten["wetter_risiko"] = wetter_risiko
+    daten["risiko"] = wetter_risiko
+    daten["packempfehlung"] = daten.get("packempfehlung") or (
+        "Plane wetterflexibel: Regenjacke, warme Schicht und bequeme Schuhe einpacken."
+    )
+    daten["tagesuebersicht"] = daten.get("tagesuebersicht") or []
+    return daten
 
 
 def baue_frontend_output(
@@ -198,7 +267,7 @@ def baue_frontend_output(
     route_plan = route_plan or {}
     frontend_plan = {
         **route_plan,
-        "weather": wetter_kachel,
+        "weather": normalisiere_wetter_kachel(wetter_kachel),
         "fuel_summary": tankstelle,
         "errors": telemetrie.fehler,
     }
@@ -237,6 +306,12 @@ def orchestrate_trip(frontend_input: Dict[str, Any], include_telemetry: bool = F
                 {"reise_etappen": wetter_etappen},
                 wetter_etappen,
             )
+    if wetter_kachel is None:
+        wetter_kachel = erstelle_fallback_wetter_kachel(
+            reise_input,
+            route_plan,
+            "Der Wetter-Agent hat keine Daten geliefert.",
+        )
 
     tank_payload = {
         "city": reise_input["start_location"],
