@@ -1,10 +1,13 @@
+const urlParams = new URLSearchParams(window.location.search);
+const customBackend = (urlParams.get('backend') || '').replace(/\/$/, '');
+const DEFAULT_BACKEND = 'https://road-to-know-where-backend.onrender.com';
+const API_BASE_URL = customBackend || DEFAULT_BACKEND;
+const isGitHubPages = window.location.hostname.endsWith('.github.io');
+const useMockBackend = false;
+
 let map;
 let routeLayer;
 let markerLayer;
-
-const API_BASE_URL = window.location.hostname.endsWith('.github.io')
-  ? 'https://sturdy-spork-vp6q7pqqvp993w69p-5000.app.github.dev'
-  : '';
 
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('startButton').addEventListener('click', () => {
@@ -52,6 +55,97 @@ function readForm() {
     budget: formData.get('budget'),
     travel_style: formData.get('travel_style'),
     interests: [formData.get('interest')],
+  };
+}
+
+function getMockResult(input) {
+  const start = input.start_location || 'München';
+  const stops = [
+    { name: start, lat: 48.137, lng: 11.575 },
+    { name: 'Augsburg', lat: 48.366, lng: 10.898 },
+    { name: 'Schwäbisch Hall', lat: 49.113, lng: 9.740 },
+  ];
+  const distance = 210;
+  const travelHours = 3.5;
+  const consumption = input.fuel_consumption_l_per_100km || 6;
+  const liters = Number(((distance * consumption) / 100).toFixed(1));
+  const price = 1.92;
+
+  return {
+    input,
+    result: {
+      frontend_plan: {
+        route_stops: stops,
+        route_geometry: stops.map((stop) => [stop.lat, stop.lng]),
+        planning_notes: [
+          'Dies ist ein Demo-Plan, weil das Backend auf GitHub Pages nicht verfügbar ist.',
+        ],
+        route_distance_km: distance,
+        route_duration_hours: travelHours,
+        fuel_summary: {
+          name: 'Demo-Tankstelle',
+          address: 'Musterstraße 1, 86150 Augsburg',
+          price,
+        },
+        cost_estimate: {
+          fuel_consumption_l_per_100km: consumption,
+          fuel_liters: liters,
+          fuel_price: price,
+          fuel_cost: Number((liters * price).toFixed(2)),
+          estimated: true,
+        },
+        daily_plan: [
+          {
+            day: 'Tag 1',
+            activities: `Start in ${start}, weiter nach Augsburg`,
+            type: 'drive',
+            drive_time_hours_estimated: 2,
+            distance_km_estimated: 120,
+            max_travel_time_hours: input.travel_time_per_day || 6,
+            within_travel_limit: true,
+            hint: 'Leichte Strecke zum Aufwärmen.',
+          },
+          {
+            day: 'Tag 2',
+            activities: 'Augsburg → Schwäbisch Hall',
+            type: 'drive',
+            drive_time_hours_estimated: 1.5,
+            distance_km_estimated: 90,
+            max_travel_time_hours: input.travel_time_per_day || 6,
+            within_travel_limit: true,
+            hint: 'Kultureller Stopp unterwegs.',
+          },
+        ],
+        weather: {
+          datengrund: 'forecast',
+          temperaturspanne: { text: '18–23 °C' },
+          anzahl_regentage: 1,
+          wetter_risiko: 'gering',
+          kritischster_tag: { ort: 'Schwäbisch Hall', grund: 'leichter Regen' },
+          packempfehlung: 'Regenjacke einpacken.',
+        },
+        pois: [
+          {
+            name: 'Neue Residenz',
+            location: 'Augsburg',
+            description: 'Historischer Stadtpalast und Gartenanlage.',
+            lat: 48.366,
+            lng: 10.898,
+          },
+          {
+            name: 'Stadtmauer',
+            location: 'Schwäbisch Hall',
+            description: 'Mittelalterliche Stadtmauer mit Blick über die Stadt.',
+            lat: 49.113,
+            lng: 9.740,
+          },
+        ],
+      },
+      telemetry: {
+        agent_aufrufe: 0,
+        laufzeit_sekunden: 0,
+      },
+    },
   };
 }
 

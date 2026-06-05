@@ -68,6 +68,26 @@ Um die Seite mit GitHub Pages zu veröffentlichen, aktiviere in den Repository-
 Einstellungen "Pages" und wähle `main` / `docs` als Quelle. Die Seite ist dann
 kostenlos und öffentlich erreichbar.
 
+## Backend veröffentlichen
+
+Das Backend läuft als Flask-App und muss separat auf einem öffentlichen Host
+bereitgestellt werden, damit die GitHub Pages-Webseite dauerhaft funktioniert.
+
+Die Repo enthält jetzt eine `render.yaml`, `Dockerfile`, `requirements.txt`
+und `Procfile`, um das Backend z.B. auf Render.com zu deployen.
+
+Standardmäßig verwendet das Frontend den Endpunkt
+`https://road-to-know-where-backend.onrender.com/api/plan`.
+
+1. Erstelle einen Render-Account und verbinde dieses Repository.
+2. Aktiviere die `render.yaml`-Konfiguration.
+3. Deploye den Service `road-to-know-where-backend`.
+4. Stelle sicher, dass der Dienst unter `https://road-to-know-where-backend.onrender.com`
+erreichbar ist.
+
+Wenn der Backend-Host anders heißt, kann die Seite als URL-Parameter
+`?backend=https://mein-backend.example.com` aufgerufen werden.
+
 ## Installation
 
 Repository klonen:

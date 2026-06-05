@@ -1,0 +1,10 @@
+services:
+  - type: web_service
+    name: road-to-know-where-backend
+    env: python
+    plan: free
+    region: frankfurt
+    branch: main
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    autoDeploy: true
