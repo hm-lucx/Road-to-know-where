@@ -56,6 +56,18 @@ Der Button "Let's get started" springt zum Formular. Nach "Route planen" sendet
 das Frontend die Eingaben an `/api/plan`; dort ruft Flask den Orchestrator auf
 und gibt Route, Wetter, POIs, Tankdaten und Kosten an die Website zurück.
 
+## Öffentliche Webseite
+
+Das Projekt enthält jetzt eine statische HTML-Webseite, die sich ohne Backend
+im Browser öffnen oder über GitHub Pages hosten lässt.
+
+- Statische Seite: `docs/index.html`
+- Alternativ: `index.html` im Projektstamm
+
+Um die Seite mit GitHub Pages zu veröffentlichen, aktiviere in den Repository-
+Einstellungen "Pages" und wähle `main` / `docs` als Quelle. Die Seite ist dann
+kostenlos und öffentlich erreichbar.
+
 ## Installation
 
 Repository klonen:

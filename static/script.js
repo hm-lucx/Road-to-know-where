@@ -2,6 +2,10 @@ let map;
 let routeLayer;
 let markerLayer;
 
+const API_BASE_URL = window.location.hostname.endsWith('.github.io')
+  ? 'https://sturdy-spork-vp6q7pqqvp993w69p-5000.app.github.dev'
+  : '';
+
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('startButton').addEventListener('click', () => {
     document.getElementById('planner').scrollIntoView({ behavior: 'smooth' });
@@ -16,7 +20,7 @@ async function handleSubmit(event) {
 
   try {
     const payload = readForm();
-    const response = await fetch('/api/plan', {
+    const response = await fetch(`${API_BASE_URL}/api/plan`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
