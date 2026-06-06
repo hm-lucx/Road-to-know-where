@@ -9,12 +9,8 @@ import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-<<<<<<< HEAD
 from flask import Flask, jsonify, make_response, render_template, request
-=======
 import requests
-from flask import Flask, jsonify, render_template, request
->>>>>>> 3f16920 (V6)
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -215,10 +211,6 @@ def plan_route():
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
-    app.run(host="0.0.0.0", port=5000, debug=True)
-=======
     port = int(os.environ.get("PORT", "5000"))
     debug = os.environ.get("FLASK_DEBUG", "").lower() in {"1", "true", "yes"}
     app.run(host="0.0.0.0", port=port, debug=debug)
->>>>>>> 3f16920 (V6)
