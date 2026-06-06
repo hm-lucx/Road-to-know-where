@@ -1,8 +1,10 @@
 const urlParams = new URLSearchParams(window.location.search);
 const customBackend = (urlParams.get('backend') || '').replace(/\/$/, '');
-const DEFAULT_BACKEND = 'https://road-to-know-where-backend.onrender.com';
-const API_BASE_URL = customBackend || DEFAULT_BACKEND;
 const isGitHubPages = window.location.hostname.endsWith('.github.io');
+const DEFAULT_BACKEND = isGitHubPages
+  ? 'https://road-to-know-where-mnox.onrender.com'
+  : window.location.origin;
+const API_BASE_URL = customBackend || DEFAULT_BACKEND;
 const useMockBackend = false;
 
 let map;
