@@ -4,6 +4,17 @@ Webanwendung zur themenbasierten Roadtrip-Planung. Das Frontend sendet
 Reiseparameter an ein Flask-Backend. Dort koordiniert der Orchestrator mehrere
 Agents fuer Route/POIs, Wetter und Tank-/Kosteninformationen.
 
+## Öffentliche URL
+
+Die aktuell deployte Webanwendung ist hier erreichbar:
+
+```text
+https://road-to-know-where-mnox.onrender.com
+```
+
+Falls GitHub Pages genutzt wird, verwendet die statische Seite dieses Render-
+Backend als Standard-API.
+
 ## Projektstruktur
 
 - `app.py`: Flask-Backend und API-Endpunkt `/api/plan`
