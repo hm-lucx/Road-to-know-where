@@ -1,4 +1,5 @@
 services:
+<<<<<<< HEAD
   - type: web_service
     name: road-to-know-where-backend
     env: python
@@ -8,3 +9,16 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
     autoDeploy: true
+=======
+  - type: web
+    name: road-to-knowwhere
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: TANKERKOENIG_API_KEY
+        sync: false
+>>>>>>> 3f16920 (V6)

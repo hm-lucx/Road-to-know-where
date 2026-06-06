@@ -191,6 +191,10 @@ function renderPlanningNotes(notes) {
 
 function renderMetrics(plan, telemetry) {
   const cost = plan.cost_estimate || {};
+  const tokenValue = telemetry.llm_total_tokens > 0
+    ? telemetry.llm_total_tokens
+    : telemetry.geschaetzte_payload_tokens;
+  const tokenLabel = telemetry.llm_total_tokens > 0 ? 'Tokens' : 'Tokens geschätzt';
   const metrics = [
     [Math.round(plan.route_distance_km || 0), 'km Autoroute'],
     [plan.route_duration_hours || 'n/a', 'h Fahrzeit'],
@@ -198,10 +202,16 @@ function renderMetrics(plan, telemetry) {
     [cost.fuel_cost ? `${cost.fuel_cost.toFixed(2)} €` : 'n/a', 'geschätzte Kosten'],
     [telemetry.agent_aufrufe || 0, 'Agent-Aufrufe'],
     [telemetry.laufzeit_sekunden || 'n/a', 'Sekunden Laufzeit'],
+    [formatNumber(tokenValue) || 'n/a', tokenLabel],
   ];
   document.getElementById('resultMetrics').innerHTML = metrics
     .map(([value, label]) => `<div class="metric"><strong>${escapeHtml(value)}</strong><span>${escapeHtml(label)}</span></div>`)
     .join('');
+}
+
+function formatNumber(value) {
+  if (value === undefined || value === null || value === '') return '';
+  return Number(value).toLocaleString('de-DE');
 }
 
 function ensureMap() {

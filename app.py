@@ -4,11 +4,17 @@
 import importlib.util
 import json
 import math
+import os
 import subprocess
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+<<<<<<< HEAD
 from flask import Flask, jsonify, make_response, render_template, request
+=======
+import requests
+from flask import Flask, jsonify, render_template, request
+>>>>>>> 3f16920 (V6)
 
 
 PROJECT_DIR = Path(__file__).resolve().parent
@@ -91,24 +97,28 @@ def hole_osrm_route(route_stops: List[Dict[str, Any]]) -> Dict[str, Any]:
     )
 
     try:
-        # curl ist hier stabiler als Python-SSL mit dem oeffentlichen OSRM-Server.
-        antwort = subprocess.run(
-            ["curl", "-fsSL", url],
-            check=True,
-            capture_output=True,
-            text=True,
-            timeout=25,
-        )
-        daten = json.loads(antwort.stdout)
-    except Exception as fehler:
-        return {
-            "geometry": [[stop["lat"], stop["lng"]] for stop in route_stops],
-            "distance_km": berechne_luftlinien_distanz(route_stops),
-            "duration_hours": None,
-            "source": "fallback",
-            "error": str(fehler),
-        }
-
+        antwort = requests.get(url, timeout=25)
+        antwort.raise_for_status()
+        daten = antwort.json()
+    except Exception:
+        try:
+            # Fallback fuer lokale macOS-Setups, bei denen Python/SSL mit OSRM zickt.
+            antwort = subprocess.run(
+                ["curl", "-fsSL", url],
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=25,
+            )
+            daten = json.loads(antwort.stdout)
+        except Exception as fehler:
+            return {
+                "geometry": [[stop["lat"], stop["lng"]] for stop in route_stops],
+                "distance_km": berechne_luftlinien_distanz(route_stops),
+                "duration_hours": None,
+                "source": "fallback",
+                "error": str(fehler),
+            }
     if daten.get("code") != "Ok" or not daten.get("routes"):
         return {
             "geometry": [[stop["lat"], stop["lng"]] for stop in route_stops],
@@ -205,4 +215,10 @@ def plan_route():
 
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     app.run(host="0.0.0.0", port=5000, debug=True)
+=======
+    port = int(os.environ.get("PORT", "5000"))
+    debug = os.environ.get("FLASK_DEBUG", "").lower() in {"1", "true", "yes"}
+    app.run(host="0.0.0.0", port=port, debug=debug)
+>>>>>>> 3f16920 (V6)

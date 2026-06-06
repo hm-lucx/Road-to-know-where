@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 __pycache__/
 *.py[cod]
 *.pyo
@@ -6,4 +7,11 @@ __pycache__/
 env/
 venv/
 *.log
+=======
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+>>>>>>> 3f16920 (V6)
 .DS_Store

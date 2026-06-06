@@ -10,7 +10,7 @@ except ImportError:
     print("Installiere es mit: python3 -m pip install requests")
     sys.exit(1)
 
-TANKERKOENIG_API_KEY = os.environ.get("TANKERKOENIG_API_KEY", "c13ba621-f734-46ef-a52b-83fd9cccc99c")
+TANKERKOENIG_API_KEY = os.environ.get("TANKERKOENIG_API_KEY")
 DEFAULT_FUEL_PRICE = 1.80
 
 
@@ -38,6 +38,9 @@ def cheapest_station(city_name, fuel_type="e5", radius_km=25):
     Returns:
         Dict mit Name, Preis, Entfernung und Adresse
     """
+    if not TANKERKOENIG_API_KEY:
+        raise ValueError("TANKERKOENIG_API_KEY ist nicht gesetzt")
+
     lat, lon = geocode_city(city_name)
     url = "https://creativecommons.tankerkoenig.de/json/list.php"
     params = {
